@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#facc15">
-<meta name="description" content="YellowBasket AI - ระบบปักตะกร้าและขายสินค้าอัจฉริยะผ่าน Omnichannel Commerce">
-<title>YellowBasket AI - ระบบ AI ปักตะกร้าอัจฉริยะขั้นสูง</title>
+<meta name="description" content="YellowBasket AI - ระบบปักตะกร้าและขายสินค้าอัจฉริยะผ่าน Omnichannel Commerce Super Engine">
+<title>YellowBasket AI - ระบบ AI ปักตะกร้าอัจฉริยะขั้นสูง v3.0</title>
 
 <!-- TailWind CSS & Icons & Fonts -->
 <script src="https://cdn.tailwindcss.com"></script>
@@ -66,13 +66,13 @@
     </div>
     <div>
       <span class="text-xl font-black text-gray-900 dark:text-white tracking-tight">YellowBasket <span class="text-brand-500">AI</span></span>
-      <span class="block text-[10px] text-gray-500 dark:text-gray-400 font-semibold tracking-wider uppercase">Smart Commerce Engine v2.0</span>
+      <span class="block text-[10px] text-gray-500 dark:text-gray-400 font-semibold tracking-wider uppercase">Omnichannel Super Engine v3.0</span>
     </div>
   </div>
   
   <div id="tabs" class="flex space-x-1 bg-gray-100 dark:bg-gray-900 p-1 rounded-xl overflow-x-auto text-xs md:text-sm font-semibold border border-gray-200/60 dark:border-gray-800">
     <button data-tab="store" class="tabbtn px-3.5 py-2 rounded-lg whitespace-nowrap transition-all"><i class="fa-solid fa-store mr-1.5"></i><span data-i18n="tab_store">หน้าร้าน</span></button>
-    <button data-tab="live" class="tabbtn px-3.5 py-2 rounded-lg whitespace-nowrap transition-all"><i class="fa-solid fa-tower-broadcast mr-1.5 text-red-500"></i><span data-i18n="tab_live">ไลฟ์สด</span></button>
+    <button data-tab="live" class="tabbtn px-3.5 py-2 rounded-lg whitespace-nowrap transition-all"><i class="fa-solid fa-tower-broadcast mr-1.5 text-red-500"></i><span data-i18n="tab_live">ไลฟ์สด AI</span></button>
     <button data-tab="dash" class="tabbtn px-3.5 py-2 rounded-lg whitespace-nowrap transition-all"><i class="fa-solid fa-chart-line mr-1.5 text-blue-500"></i><span data-i18n="tab_dash">แดชบอร์ด</span></button>
     <button data-tab="studio" class="tabbtn px-3.5 py-2 rounded-lg whitespace-nowrap transition-all"><i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-purple-500"></i><span data-i18n="tab_studio">AI Studio</span></button>
     <button data-tab="orders" class="tabbtn px-3.5 py-2 rounded-lg whitespace-nowrap transition-all"><i class="fa-solid fa-box mr-1.5 text-amber-600"></i><span data-i18n="tab_orders">ออเดอร์</span></button>
@@ -102,7 +102,7 @@
     </div>
     <div class="text-gray-900 z-10">
       <span class="inline-flex items-center gap-1.5 bg-gray-900 text-brand-400 text-xs font-black px-3 py-1 rounded-full mb-3 shadow-sm">
-        <i class="fa-solid fa-bolt text-yellow-400"></i> FLASH SALE
+        <i class="fa-solid fa-bolt text-yellow-400"></i> OMNICHANNEL FLASH SALE
       </span>
       <h1 class="text-3xl md:text-5xl font-black tracking-tight leading-tight" data-i18n="hero_title">ปักตะกร้าเหลือง ลดสูงสุด 40%</h1>
       <p class="mt-2 text-sm md:text-base font-medium opacity-90" data-i18n="hero_sub">ใช้โค้ด YELLOW10 ลดเพิ่ม 10% · ส่งฟรีเมื่อซื้อครบ ฿999</p>
@@ -144,7 +144,7 @@
         
         <div class="absolute top-4 left-4 flex gap-2 items-center z-20">
           <span class="bg-red-600 text-white text-xs font-black px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-md">
-            <span class="w-2 h-2 rounded-full bg-white pulse-dot"></span> LIVE
+            <span class="w-2 h-2 rounded-full bg-white pulse-dot"></span> LIVE AI STREAM
           </span>
           <span class="bg-black/60 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded-lg border border-white/10">
             <i class="fa-solid fa-eye text-brand-400 mr-1"></i> <span id="viewers">1,284</span>
@@ -452,7 +452,7 @@ let lang = load('yb_lang', 'th'), dark = load('yb_dark', false);
 let endpoint = load('yb_endpoint', '');
 let cat = 'ทั้งหมด', tab = 'store', charts = {};
 let liveStats = {sales:0, clicks:0, hearts:0}, pinnedId = 'p1', funnel = {visitors:12400, views:5200};
-const abandonedSeed = [{n:'คุณแพร',items:'Robot Vacuum Lite ×1',v:4590},{n:'คุณบอย',items:'AI Webcam 4K ×1, Desk Pad ×1',v:3180}];
+const abandonedData = [{n:'คุณแพร',items:'Robot Vacuum Lite ×1',v:4590},{n:'คุณบอย',items:'AI Webcam 4K ×1, Desk Pad ×1',v:3180}];
 
 /* ============ UTILS ============ */
 const $ = id => document.getElementById(id);
@@ -468,8 +468,8 @@ function toast(msg, type='ok'){
 }
 
 const I18N = {
- th:{tab_store:'หน้าร้าน',tab_live:'ไลฟ์สด',tab_dash:'แดชบอร์ด',tab_studio:'AI Studio',tab_orders:'ออเดอร์',hero_title:'ปักตะกร้าเหลือง ลดสูงสุด 40%',hero_sub:'ใช้โค้ด YELLOW10 ลดเพิ่ม 10% · ส่งฟรีเมื่อซื้อครบ ฿999',ends_in:'สิ้นสุดใน'},
- en:{tab_store:'Store',tab_live:'Live',tab_dash:'Dashboard',tab_studio:'AI Studio',tab_orders:'Orders',hero_title:'Yellow Basket Sale — up to 40% off',hero_sub:'Use code YELLOW10 for 10% extra · Free shipping over ฿999',ends_in:'Ends in'}
+ th:{tab_store:'หน้าร้าน',tab_live:'ไลฟ์สด AI',tab_dash:'แดชบอร์ด',tab_studio:'AI Studio',tab_orders:'ออเดอร์',hero_title:'ปักตะกร้าเหลือง ลดสูงสุด 40%',hero_sub:'ใช้โค้ด YELLOW10 ลดเพิ่ม 10% · ส่งฟรีเมื่อซื้อครบ ฿999',ends_in:'สิ้นสุดใน'},
+ en:{tab_store:'Store',tab_live:'AI Live',tab_dash:'Dashboard',tab_studio:'AI Studio',tab_orders:'Orders',hero_title:'Yellow Basket Sale — up to 40% off',hero_sub:'Use code YELLOW10 for 10% extra · Free shipping over ฿999',ends_in:'Ends in'}
 };
 
 function applyLang(){
@@ -926,6 +926,13 @@ function renderOrders(){
       <td class="p-4 text-center">${o.st<3?`<button onclick="advance(${i})" class="text-xs bg-gray-900 text-brand-400 px-3 py-1.5 rounded-xl font-bold">ขั้นถัดไป →</button>`:'<i class="fa-solid fa-check text-green-500"></i>'}</td>
     </tr>
   `).join('');
+
+  $('abandoned').innerHTML = abandonedData.map(a => `
+    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/40 rounded-2xl">
+      <div><b>${esc(a.n)}</b> ทิ้งตะกร้าไว้ (${esc(a.items)}) — มูลค่า ${baht(a.v)}</div>
+      <button onclick="toast('ส่งคูปองส่วนลด 15% ไปยัง LINE OA ของ ${esc(a.n)} สำเร็จ!')" class="px-3 py-1.5 bg-brand-400 text-gray-900 rounded-xl text-xs font-bold">ส่งคูปองกู้ตะกร้า</button>
+    </div>
+  `).join('');
 }
 
 function advance(i){ orders[i].st = Math.min(3, orders[i].st+1); save('yb_orders', orders); renderOrders() }
@@ -944,3 +951,4 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+```[cite: 1]

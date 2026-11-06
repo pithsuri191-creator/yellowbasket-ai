@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YellowBasket AI - ระบบ AI ปักตะกร้าอัจฉริยะ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Navigation Bar -->
+  <nav class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shadow-sm">
+    <div class="flex items-center space-x-3">
+      <div class="p-2 bg-yellow-400 text-gray-900 rounded-lg font-bold shadow-sm">
+        <i class="fa-solid fa-basket-shopping text-xl"></i>
+      </div>
+      <div>
+        <span class="text-xl font-extrabold text-gray-900 tracking-tight">YellowBasket <span class="text-yellow-500">AI</span></span>
+        <span class="block text-xs text-gray-400 font-medium">Smart Omnichannel Cart Engine</span>
+      </div>
+    </div>
+    <div class="flex space-x-2 bg-gray-100 p-1 rounded-lg">
+      <button onclick="switchTab('store-tab')" id="btn-store-tab" class="px-4 py-2 rounded-md font-medium text-sm bg-white shadow-sm text-gray-900">หน้าร้านปักตะกร้า (Storefront)</button>
+      <button onclick="switchTab('dashboard-tab')" id="btn-dashboard-tab" class="px-4 py-2 rounded-md font-medium text-sm text-gray-500">แดชบอร์ดบริหารงาน (Dashboard)</button>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto p-6">
+    <!-- TAB 1: STOREFRONT & CART -->
+    <div id="store-tab" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2 space-y-6">
+        <h2 class="text-2xl font-bold text-gray-800">สินค้ายอดนิยมพร้อมปักตะกร้า</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col justify-between">
+            <div>
+              <div class="h-40 bg-yellow-50 rounded-lg flex items-center justify-center mb-4 border border-yellow-100">
+                <i class="fa-solid fa-robot text-5xl text-yellow-500"></i>
+              </div>
+              <h3 class="text-lg font-bold text-gray-900">Smart AI Desk Companion</h3>
+              <p class="text-sm text-gray-500 mt-1">อุปกรณ์ AI ช่วยจัดลำดับงานและวิเคราะห์ข้อมูลการขายอัตโนมัติ</p>
+            </div>
+            <div class="flex justify-between items-center mt-6">
+              <span class="text-xl font-extrabold text-gray-900">฿2,490</span>
+              <button onclick="addToCart('prod_1', 'Smart AI Desk Companion', 2490)" class="px-4 py-2 bg-yellow-400 text-gray-900 font-bold rounded-lg hover:bg-yellow-500 transition-all shadow-sm">
+                <i class="fa-solid fa-cart-plus mr-1"></i> เพิ่มลงตะกร้า
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cart Side Panel -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-fit space-y-4">
+        <h3 class="text-lg font-bold border-b pb-3 flex items-center gap-2">
+          <i class="fa-solid fa-cart-shopping text-yellow-500"></i> ตะกร้าสินค้าของคุณ
+        </h3>
+        <div id="cart-items" class="space-y-3 text-sm text-gray-600">
+          <p class="text-gray-400 text-center py-4">ไม่มีสินค้าในตะกร้า</p>
+        </div>
+        <div class="border-t pt-3 space-y-2 text-sm">
+          <div class="flex justify-between"><span>รวมยอดสินค้า</span><span id="cart-subtotal">฿0</span></div>
+          <div class="flex justify-between font-bold text-base text-gray-900 pt-2 border-t"><span>ยอดชำระสุทธิ</span><span id="cart-total">฿0</span></div>
+        </div>
+        <button onclick="checkout()" class="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 rounded-lg font-extrabold shadow-md transition-all">
+          ชำระเงิน / ยืนยันออเดอร์
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 2: DASHBOARD -->
+    <div id="dashboard-tab" class="tab-content hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          <p class="text-sm font-medium text-gray-500">ยอดขายรวมทั้งหมด</p>
+          <h4 class="text-2xl font-bold text-gray-900 mt-1">฿148,200</h4>
+          <span class="text-xs text-green-600 font-semibold"><i class="fa-solid fa-arrow-up"></i> +18.4% สัปดาห์นี้</span>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          <p class="text-sm font-medium text-gray-500">คำสั่งซื้อผ่าน YellowBasket</p>
+          <h4 class="text-2xl font-bold text-gray-900 mt-1">342 รายการ</h4>
+        </div>
+      </div>
+
+      <!-- AI Generator Box -->
+      <div class="bg-white p-6 rounded-xl border border-yellow-200 shadow-sm space-y-4">
+        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <i class="fa-solid fa-wand-magic-sparkles text-yellow-500"></i> YellowBasket AI Generator (Gemini Engine)
+        </h3>
+        <p class="text-xs text-gray-500">สร้างสคริปต์บทพูดและแคปชันสำหรับปักตะกร้าเหลืองด้วยพลังของ Vertex AI</p>
+        <div class="flex gap-4">
+          <input type="text" id="ai-product-url" placeholder="วาง URL ภาพสินค้า หรือพิมพ์ชื่อสินค้า..." class="flex-1 border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400">
+          <button onclick="generateAiCopywriting()" class="px-5 py-2 bg-yellow-400 text-gray-900 font-bold rounded-lg hover:bg-yellow-500 text-sm shadow-sm">
+            เจเนอเรตสคริปต์
+          </button>
+        </div>
+        <div id="ai-output-box" class="p-4 bg-yellow-50/50 rounded-lg text-sm text-gray-700 border border-dashed border-yellow-200 min-h-[80px]">
+          ผลลัพธ์สคริปต์ปักตะกร้าจาก YellowBasket AI จะแสดงขึ้นที่นี่...
+        </div>
+      </div>
+
+      <!-- Analytics Chart -->
+      <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+        <h3 class="text-lg font-bold mb-4">สัดส่วนช่องทางยอดขาย YellowBasket Sync</h3>
+        <div class="h-64">
+          <canvas id="salesChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // อัปเดต URL นี้เมื่อ Deploy Cloud Function เรียบร้อยแล้ว
+    const CLOUD_FUNCTION_URL = 'https://us-central1-YOUR_PROJECT_ID.cloudfunctions.net/yellowBasketAPI';
+    let cart = [];
+    const userId = 'user_' + Math.random().toString(36).substring(7);
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+    }
+
+    async function addToCart(id, name, price) {
+      const item = { id, name, price, quantity: 1 };
+      cart.push(item);
+      updateCartUI();
+
+      try {
+        await fetch(CLOUD_FUNCTION_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'addToCart', userId, item })
+        });
+      } catch(e) {
+        console.log('Syncing data locally.');
+      }
+    }
+
+    function updateCartUI() {
+      const container = document.getElementById('cart-items');
+      if(cart.length === 0) {
+        container.innerHTML = 'ไม่มีสินค้าในตะกร้า';
+        return;
+      }
+      container.innerHTML = cart.map(i => `<div class="flex justify-between"><span>${i.name}</span><font class="font-bold">฿${i.price}</font></div>`).join('');
+      const subtotal = cart.reduce((sum, i) => sum + i.price, 0);
+      document.getElementById('cart-subtotal').innerText = '฿' + subtotal;
+      document.getElementById('cart-total').innerText = '฿' + subtotal;
+    }
+
+    async function generateAiCopywriting() {
+      const url = document.getElementById('ai-product-url').value;
+      const box = document.getElementById('ai-output-box');
+      if(!url) return alert('กรุณาระบุข้อมูลสินค้าหรือ URL ภาพ');
+      box.innerText = 'YellowBasket AI (Gemini Engine) กำลังวิเคราะห์ข้อมูล...';
+
+      try {
+        const res = await fetch(CLOUD_FUNCTION_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'generateAiPost', productImageUrl: url })
+        });
+        const data = await res.json();
+        box.innerText = data.copywriting || data.error;
+      } catch(e) {
+        box.innerText = 'สคริปต์ตัวอย่าง YellowBasket AI: ไอเทมนี้กำลังมาแรงมากๆ พิกัดของแท้พร้อมส่ง กดสั่งในตะกร้าสีเหลืองมุมซ้ายล่างได้เลยก่อนของจะหมดสต๊อกค่ะ! #YellowBasketAI #รีวิวของดี';
+      }
+    }
+
+    window.onload = function() {
+      const ctx = document.getElementById('salesChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['TikTok Shop Affiliate', 'Shopee Sync', 'Direct Web Store', 'Lazada Sync'],
+          datasets: [{ data: [50, 20, 20, 10], backgroundColor: ['#eab308', '#ee4d2d', '#111827', '#0f146d'] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+    };
+  </script>
+</body>
+</html>

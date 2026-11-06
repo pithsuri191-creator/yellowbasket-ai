@@ -1,678 +1,945 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="scroll-smooth">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#facc15">
-<title>YellowBasket AI - ระบบ AI ปักตะกร้าอัจฉริยะ</title>
+<meta name="description" content="YellowBasket AI - ระบบปักตะกร้าและขายสินค้าอัจฉริยะผ่าน Omnichannel Commerce">
+<title>YellowBasket AI - ระบบ AI ปักตะกร้าอัจฉริยะขั้นสูง</title>
+
+<!-- TailWind CSS & Icons & Fonts -->
 <script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            50: '#fefce8',
+            100: '#fef9c3',
+            400: '#facc15',
+            500: '#eab308',
+            600: '#ca8a04',
+            900: '#713f12'
+          }
+        },
+        keyframes: {
+          shimmer: { '100%': { transform: 'translateX(100%)' } },
+          floatUp: { '0%': { transform: 'translateY(0)', opacity: '1' }, '100%': { transform: 'translateY(-160px)', opacity: '0' } }
+        },
+        animation: {
+          shimmer: 'shimmer 1.5s infinite',
+          floatUp: 'floatUp 1.6s ease-out forwards'
+        }
+      }
+    }
+  }
+</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
 <style>
-  body{font-family:'Noto Sans Thai',system-ui,sans-serif}
-  .dark body{background:#0b1120;color:#e5e7eb}
-  .dark .bg-white{background:#111827!important}
-  .dark .bg-gray-50{background:#0b1120!important}
-  .dark .bg-gray-100{background:#1f2937!important}
-  .dark .bg-yellow-50,.dark .bg-yellow-50\/50{background:#2a2410!important}
-  .dark .border-gray-200,.dark .border-gray-100,.dark .border-yellow-100,.dark .border-yellow-200{border-color:#374151!important}
-  .dark .text-gray-900,.dark .text-gray-800{color:#f3f4f6!important}
-  .dark .text-gray-700,.dark .text-gray-600{color:#d1d5db!important}
-  .dark .text-gray-500,.dark .text-gray-400{color:#9ca3af!important}
-  .dark input,.dark select,.dark textarea{background:#1f2937;color:#f3f4f6;border-color:#374151}
-  .view{display:none}.view.active{display:block}
-  .chip.on{background:#facc15;color:#111827;border-color:#facc15}
-  .pulse-dot{animation:pulse 1.4s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-  @keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
-  .pop{animation:pop .2s ease-out}
-  @keyframes floatUp{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-140px);opacity:0}}
-  .heart{position:absolute;bottom:10px;right:14px;animation:floatUp 1.6s ease-out forwards;pointer-events:none}
-  #chat-log::-webkit-scrollbar,#live-chat::-webkit-scrollbar{width:6px}
-  #chat-log::-webkit-scrollbar-thumb,#live-chat::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:6px}
+  body { font-family: 'Noto Sans Thai', system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+  .glass-nav { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .dark .glass-nav { background: rgba(17, 24, 39, 0.85); }
+  .view { display: none; opacity: 0; transition: opacity 0.25s ease-in-out; }
+  .view.active { display: block; opacity: 1; }
+  .chip.on { background: #facc15; color: #111827; border-color: #facc15; font-weight: 700; }
+  .pulse-dot { animation: pulse 1.4s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .pop { animation: pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+  @keyframes pop { 0% { transform: scale(0.94); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  .heart { position: absolute; bottom: 10px; right: 14px; animation: floatUp 1.6s ease-out forwards; pointer-events: none; }
+  #chat-log::-webkit-scrollbar, #live-chat::-webkit-scrollbar { width: 4px; }
+  #chat-log::-webkit-scrollbar-thumb, #live-chat::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 4px; }
 </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-gray-50 text-gray-800 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300 min-h-screen flex flex-col">
 
-<!-- NAV -->
-<nav class="bg-white border-b border-gray-200 px-4 md:px-6 py-3 flex flex-wrap gap-3 justify-between items-center shadow-sm sticky top-0 z-30">
-  <div class="flex items-center space-x-3">
-    <div class="p-2 bg-yellow-400 text-gray-900 rounded-lg shadow-sm"><i class="fa-solid fa-basket-shopping text-xl"></i></div>
+<!-- NAVBAR -->
+<nav class="glass-nav border-b border-gray-200 dark:border-gray-800 px-4 md:px-6 py-3 flex flex-wrap gap-3 justify-between items-center sticky top-0 z-40 transition-colors">
+  <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('store')">
+    <div class="p-2.5 bg-brand-400 text-gray-900 rounded-xl shadow-md transform hover:rotate-6 transition-transform">
+      <i class="fa-solid fa-basket-shopping text-xl"></i>
+    </div>
     <div>
-      <span class="text-xl font-extrabold text-gray-900 tracking-tight">YellowBasket <span class="text-yellow-500">AI</span></span>
-      <span class="block text-xs text-gray-400 font-medium">Smart Omnichannel Commerce Engine</span>
+      <span class="text-xl font-black text-gray-900 dark:text-white tracking-tight">YellowBasket <span class="text-brand-500">AI</span></span>
+      <span class="block text-[10px] text-gray-500 dark:text-gray-400 font-semibold tracking-wider uppercase">Smart Commerce Engine v2.0</span>
     </div>
   </div>
-  <div id="tabs" class="flex space-x-1 bg-gray-100 p-1 rounded-lg overflow-x-auto text-sm">
-    <button data-tab="store" class="tabbtn px-3 py-2 rounded-md font-medium whitespace-nowrap"><i class="fa-solid fa-store mr-1"></i><span data-i18n="tab_store">หน้าร้าน</span></button>
-    <button data-tab="live" class="tabbtn px-3 py-2 rounded-md font-medium whitespace-nowrap"><i class="fa-solid fa-tower-broadcast mr-1 text-red-500"></i><span data-i18n="tab_live">ไลฟ์สด</span></button>
-    <button data-tab="dash" class="tabbtn px-3 py-2 rounded-md font-medium whitespace-nowrap"><i class="fa-solid fa-chart-line mr-1"></i><span data-i18n="tab_dash">แดชบอร์ด</span></button>
-    <button data-tab="studio" class="tabbtn px-3 py-2 rounded-md font-medium whitespace-nowrap"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i><span data-i18n="tab_studio">AI Studio</span></button>
-    <button data-tab="orders" class="tabbtn px-3 py-2 rounded-md font-medium whitespace-nowrap"><i class="fa-solid fa-box mr-1"></i><span data-i18n="tab_orders">ออเดอร์</span></button>
+  
+  <div id="tabs" class="flex space-x-1 bg-gray-100 dark:bg-gray-900 p-1 rounded-xl overflow-x-auto text-xs md:text-sm font-semibold border border-gray-200/60 dark:border-gray-800">
+    <button data-tab="store" class="tabbtn px-3.5 py-2 rounded-lg whitespace-nowrap transition-all"><i class="fa-solid fa-store mr-1.5"></i><span data-i18n="tab_store">หน้าร้าน</span></button>
+    <button data-tab="live" class="tabbtn px-3.5 py-2 rounded-lg whitespace-nowrap transition-all"><i class="fa-solid fa-tower-broadcast mr-1.5 text-red-500"></i><span data-i18n="tab_live">ไลฟ์สด</span></button>
+    <button data-tab="dash" class="tabbtn px-3.5 py-2 rounded-lg whitespace-nowrap transition-all"><i class="fa-solid fa-chart-line mr-1.5 text-blue-500"></i><span data-i18n="tab_dash">แดชบอร์ด</span></button>
+    <button data-tab="studio" class="tabbtn px-3.5 py-2 rounded-lg whitespace-nowrap transition-all"><i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-purple-500"></i><span data-i18n="tab_studio">AI Studio</span></button>
+    <button data-tab="orders" class="tabbtn px-3.5 py-2 rounded-lg whitespace-nowrap transition-all"><i class="fa-solid fa-box mr-1.5 text-amber-600"></i><span data-i18n="tab_orders">ออเดอร์</span></button>
   </div>
+
   <div class="flex items-center gap-2">
-    <button onclick="toggleLang()" id="lang-btn" class="w-10 h-10 rounded-lg bg-gray-100 text-xs font-bold">TH</button>
-    <button onclick="toggleDark()" class="w-10 h-10 rounded-lg bg-gray-100"><i id="dark-ico" class="fa-solid fa-moon"></i></button>
-    <button onclick="toggleCart(true)" class="relative px-4 h-10 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold rounded-lg shadow-sm">
-      <i class="fa-solid fa-cart-shopping"></i>
-      <span id="cart-badge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+    <button onclick="toggleLang()" id="lang-btn" class="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 text-xs font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">TH</button>
+    <button onclick="toggleDark()" class="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+      <i id="dark-ico" class="fa-solid fa-moon"></i>
+    </button>
+    <button onclick="toggleCart(true)" class="relative px-3.5 h-9 bg-brand-400 hover:bg-brand-500 text-gray-900 font-extrabold rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center">
+      <i class="fa-solid fa-cart-shopping text-sm"></i>
+      <span id="cart-badge" class="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center border-2 border-white dark:border-gray-900 shadow">0</span>
     </button>
   </div>
 </nav>
 
-<main class="max-w-7xl mx-auto p-4 md:p-6">
+<!-- MAIN CONTENT -->
+<main class="max-w-7xl mx-auto p-4 md:p-6 flex-1 w-full">
 
-<!-- ================= STORE ================= -->
+<!-- ================= STORE VIEW ================= -->
 <section id="view-store" class="view space-y-6">
-  <div class="rounded-2xl bg-gradient-to-r from-yellow-400 to-amber-300 p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow">
-    <div class="text-gray-900">
-      <span class="inline-block bg-gray-900 text-yellow-300 text-xs font-bold px-3 py-1 rounded-full mb-3"><i class="fa-solid fa-bolt"></i> FLASH SALE</span>
-      <h1 class="text-2xl md:text-4xl font-extrabold leading-tight" data-i18n="hero_title">ปักตะกร้าเหลือง ลดสูงสุด 40%</h1>
-      <p class="mt-2 text-sm md:text-base opacity-80" data-i18n="hero_sub">ใช้โค้ด YELLOW10 ลดเพิ่ม 10% · ส่งฟรีเมื่อซื้อครบ ฿999</p>
+  <!-- Banner -->
+  <div class="rounded-3xl bg-gradient-to-r from-brand-400 via-amber-300 to-yellow-500 p-6 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl relative overflow-hidden">
+    <div class="absolute -right-10 -bottom-10 opacity-10 text-gray-900 pointer-events-none">
+      <i class="fa-solid fa-basket-shopping text-[240px]"></i>
     </div>
-    <div class="text-center">
-      <div class="text-xs font-bold text-gray-900 mb-1" data-i18n="ends_in">สิ้นสุดใน</div>
-      <div id="countdown" class="flex gap-2 text-2xl font-extrabold text-yellow-300"></div>
+    <div class="text-gray-900 z-10">
+      <span class="inline-flex items-center gap-1.5 bg-gray-900 text-brand-400 text-xs font-black px-3 py-1 rounded-full mb-3 shadow-sm">
+        <i class="fa-solid fa-bolt text-yellow-400"></i> FLASH SALE
+      </span>
+      <h1 class="text-3xl md:text-5xl font-black tracking-tight leading-tight" data-i18n="hero_title">ปักตะกร้าเหลือง ลดสูงสุด 40%</h1>
+      <p class="mt-2 text-sm md:text-base font-medium opacity-90" data-i18n="hero_sub">ใช้โค้ด YELLOW10 ลดเพิ่ม 10% · ส่งฟรีเมื่อซื้อครบ ฿999</p>
+    </div>
+    <div class="bg-gray-900/90 backdrop-blur-md text-white p-4 rounded-2xl border border-white/10 text-center shrink-0 shadow-lg z-10">
+      <div class="text-[11px] font-bold text-gray-400 mb-1.5 tracking-wider uppercase" data-i18n="ends_in">สิ้นสุดใน</div>
+      <div id="countdown" class="flex gap-1.5 text-2xl font-black text-brand-400"></div>
     </div>
   </div>
 
+  <!-- Search & Filter -->
   <div class="flex flex-col md:flex-row gap-3 md:items-center">
     <div class="relative flex-1">
       <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-400"></i>
-      <input id="search" oninput="renderProducts()" placeholder="ค้นหาสินค้า..." class="w-full border rounded-lg pl-11 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400">
-      <button onclick="voiceSearch()" title="ค้นหาด้วยเสียง" class="absolute right-3 top-2.5 w-8 h-8 rounded-full text-gray-500 hover:text-yellow-500"><i class="fa-solid fa-microphone"></i></button>
+      <input id="search" oninput="renderProducts()" placeholder="ค้นหาสินค้าด้วยชื่อ หรือ AI Keyword..." class="w-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl pl-11 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 shadow-sm transition-all">
+      <button id="voice-btn" onclick="voiceSearch()" title="ค้นหาด้วยเสียง" class="absolute right-2.5 top-2 w-8 h-8 rounded-lg text-gray-500 hover:text-brand-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all flex items-center justify-center">
+        <i class="fa-solid fa-microphone"></i>
+      </button>
     </div>
-    <select id="sort" onchange="renderProducts()" class="border rounded-lg px-3 py-3 text-sm">
-      <option value="pop">ยอดนิยม</option><option value="low">ราคาต่ำ → สูง</option><option value="high">ราคาสูง → ต่ำ</option><option value="rate">คะแนนสูงสุด</option>
+    <select id="sort" onchange="renderProducts()" class="border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-400 shadow-sm">
+      <option value="pop">🔥 ยอดนิยมสูงสุด</option>
+      <option value="low">💵 ราคา: ต่ำ → สูง</option>
+      <option value="high">💎 ราคา: สูง → ต่ำ</option>
+      <option value="rate">⭐ คะแนนรีวิวสูงสุด</option>
     </select>
   </div>
-  <div id="chips" class="flex gap-2 overflow-x-auto pb-1"></div>
-  <div id="product-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4"></div>
+  
+  <div id="chips" class="flex gap-2 overflow-x-auto pb-1 no-scrollbar"></div>
+  <div id="product-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"></div>
 </section>
 
-<!-- ================= LIVE ================= -->
+<!-- ================= LIVE VIEW ================= -->
 <section id="view-live" class="view">
   <div class="grid lg:grid-cols-3 gap-6">
     <div class="lg:col-span-2 space-y-4">
-      <div class="relative rounded-2xl overflow-hidden bg-gray-900 aspect-video flex items-center justify-center shadow" id="live-stage">
-        <div class="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-black"></div>
-        <i class="fa-solid fa-user-astronaut text-8xl text-yellow-400/70 relative"></i>
-        <div class="absolute top-3 left-3 flex gap-2 items-center">
-          <span class="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded"><i class="fa-solid fa-circle text-[8px] pulse-dot"></i> LIVE</span>
-          <span class="bg-black/50 text-white text-xs px-2 py-1 rounded"><i class="fa-solid fa-eye"></i> <span id="viewers">1,284</span></span>
+      <div class="relative rounded-3xl overflow-hidden bg-gray-950 aspect-video flex items-center justify-center shadow-2xl border border-gray-800" id="live-stage">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40 z-10"></div>
+        <i class="fa-solid fa-user-astronaut text-9xl text-brand-400/60 relative z-0 animate-pulse"></i>
+        
+        <div class="absolute top-4 left-4 flex gap-2 items-center z-20">
+          <span class="bg-red-600 text-white text-xs font-black px-2.5 py-1 rounded-lg flex items-center gap-1.5 shadow-md">
+            <span class="w-2 h-2 rounded-full bg-white pulse-dot"></span> LIVE
+          </span>
+          <span class="bg-black/60 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded-lg border border-white/10">
+            <i class="fa-solid fa-eye text-brand-400 mr-1"></i> <span id="viewers">1,284</span>
+          </span>
         </div>
-        <div class="absolute top-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded">AI Host "น้องเหลือง" กำลังรีวิว</div>
-        <!-- pinned basket -->
-        <div id="pinned" class="absolute bottom-3 left-3 right-3 bg-white/95 text-gray-900 rounded-xl p-3 flex items-center gap-3 shadow-lg"></div>
-        <button onclick="sendHeart()" class="absolute bottom-24 right-4 w-11 h-11 rounded-full bg-pink-500 text-white shadow"><i class="fa-solid fa-heart"></i></button>
-        <div id="hearts" class="absolute inset-0 pointer-events-none"></div>
+        
+        <div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white text-xs font-semibold px-3 py-1.5 rounded-lg border border-white/10 z-20">
+          <i class="fa-solid fa-robot text-brand-400 mr-1"></i> AI Host "น้องเหลือง"
+        </div>
+        
+        <!-- Pinned Product -->
+        <div id="pinned" class="absolute bottom-4 left-4 right-16 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md text-gray-900 dark:text-white rounded-2xl p-3 flex items-center gap-3 shadow-2xl border border-white/20 dark:border-gray-800 z-20"></div>
+        
+        <button onclick="sendHeart()" class="absolute bottom-4 right-4 w-12 h-12 rounded-full bg-pink-500 hover:bg-pink-600 text-white shadow-lg flex items-center justify-center active:scale-90 transition-transform z-20">
+          <i class="fa-solid fa-heart text-xl"></i>
+        </button>
+        <div id="hearts" class="absolute inset-0 pointer-events-none z-30"></div>
       </div>
-      <div class="bg-white border border-gray-200 rounded-xl p-4">
-        <h3 class="font-bold mb-3 text-sm"><i class="fa-solid fa-thumbtack text-yellow-500"></i> เลือกสินค้าที่จะ "ปักตะกร้าเหลือง" ในไลฟ์</h3>
-        <div id="live-picker" class="flex gap-2 overflow-x-auto"></div>
+      
+      <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 shadow-sm">
+        <h3 class="font-bold mb-3 text-sm flex items-center gap-2"><i class="fa-solid fa-thumbtack text-brand-500"></i> เลือกสินค้าที่จะ "ปักตะกร้าเหลือง" ในไลฟ์</h3>
+        <div id="live-picker" class="flex gap-2 overflow-x-auto pb-1 no-scrollbar"></div>
       </div>
+
       <div class="grid grid-cols-3 gap-3 text-center">
-        <div class="bg-white border border-gray-200 rounded-xl p-3"><div class="text-xs text-gray-500">ยอดขายไลฟ์นี้</div><div id="live-sales" class="text-xl font-extrabold">฿0</div></div>
-        <div class="bg-white border border-gray-200 rounded-xl p-3"><div class="text-xs text-gray-500">คลิกตะกร้า</div><div id="live-clicks" class="text-xl font-extrabold">0</div></div>
-        <div class="bg-white border border-gray-200 rounded-xl p-3"><div class="text-xs text-gray-500">หัวใจ</div><div id="live-hearts" class="text-xl font-extrabold">0</div></div>
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-3.5 shadow-sm">
+          <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">ยอดขายไลฟ์นี้</div>
+          <div id="live-sales" class="text-xl font-black text-gray-900 dark:text-white mt-0.5">฿0</div>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-3.5 shadow-sm">
+          <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">คลิกตะกร้า</div>
+          <div id="live-clicks" class="text-xl font-black text-gray-900 dark:text-white mt-0.5">0</div>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-3.5 shadow-sm">
+          <div class="text-xs text-gray-500 dark:text-gray-400 font-medium">หัวใจ</div>
+          <div id="live-hearts" class="text-xl font-black text-pink-500 mt-0.5">0</div>
+        </div>
       </div>
     </div>
-    <div class="bg-white border border-gray-200 rounded-2xl flex flex-col h-[560px]">
-      <div class="px-4 py-3 border-b font-bold text-sm flex justify-between"><span><i class="fa-regular fa-comments text-yellow-500"></i> แชทสด</span><span class="text-xs text-gray-400">AI ช่วยตอบอัตโนมัติ</span></div>
-      <div id="live-chat" class="flex-1 overflow-y-auto p-3 space-y-2 text-sm"></div>
-      <div class="p-3 border-t flex gap-2">
-        <input id="live-input" onkeydown="if(event.key==='Enter')sendLiveChat()" placeholder="พิมพ์ข้อความ..." class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400">
-        <button onclick="sendLiveChat()" class="px-4 bg-yellow-400 rounded-lg font-bold"><i class="fa-solid fa-paper-plane"></i></button>
+
+    <!-- Chat Box -->
+    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl flex flex-col h-[580px] shadow-sm overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-gray-200 dark:border-gray-800 font-bold text-sm flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50">
+        <span class="flex items-center gap-2"><i class="fa-regular fa-comments text-brand-500"></i> แชทสดชุมชน</span>
+        <span class="text-[11px] bg-brand-400/20 text-brand-600 dark:text-brand-400 px-2.5 py-0.5 rounded-full font-bold">AI Bot Active</span>
+      </div>
+      <div id="live-chat" class="flex-1 overflow-y-auto p-4 space-y-3 text-sm"></div>
+      <div class="p-3 border-t border-gray-200 dark:border-gray-800 flex gap-2 bg-white dark:bg-gray-900">
+        <input id="live-input" onkeydown="if(event.key==='Enter')sendLiveChat()" placeholder="ถามข้อสงสัยสินค้าในไลฟ์..." class="flex-1 border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400">
+        <button onclick="sendLiveChat()" class="px-4 bg-brand-400 hover:bg-brand-500 text-gray-900 rounded-xl font-extrabold text-sm transition-all"><i class="fa-solid fa-paper-plane"></i></button>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ================= DASHBOARD ================= -->
+<!-- ================= DASHBOARD VIEW ================= -->
 <section id="view-dash" class="view space-y-6">
   <div id="kpis" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+  
   <div class="grid lg:grid-cols-3 gap-6">
-    <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-      <h3 class="font-bold mb-3">รายได้ 7 วันล่าสุด</h3>
+    <div class="lg:col-span-2 bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+      <h3 class="font-bold mb-4 text-base flex items-center gap-2"><i class="fa-solid fa-chart-area text-brand-500"></i> แนวโน้มรายได้ 7 วันล่าสุด</h3>
       <div class="h-64"><canvas id="revChart"></canvas></div>
     </div>
-    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-      <h3 class="font-bold mb-3">สัดส่วนช่องทางขาย</h3>
+    <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+      <h3 class="font-bold mb-4 text-base flex items-center gap-2"><i class="fa-solid fa-pie-chart text-brand-500"></i> สัดส่วนช่องทาง Omnichannel</h3>
       <div class="h-64"><canvas id="chanChart"></canvas></div>
     </div>
   </div>
+
   <div class="grid lg:grid-cols-3 gap-6">
-    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-      <h3 class="font-bold mb-3">Conversion Funnel</h3>
+    <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+      <h3 class="font-bold mb-4 text-base flex items-center gap-2"><i class="fa-solid fa-filter text-brand-500"></i> Conversion Funnel</h3>
       <div class="h-56"><canvas id="funnelChart"></canvas></div>
     </div>
-    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-      <h3 class="font-bold mb-3"><i class="fa-solid fa-plug text-yellow-500"></i> Omnichannel Sync</h3>
-      <div id="channels" class="space-y-3 text-sm"></div>
+    <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+      <h3 class="font-bold mb-4 text-base flex items-center gap-2"><i class="fa-solid fa-plug text-brand-500"></i> Omnichannel Sync</h3>
+      <div id="channels" class="space-y-3.5 text-sm"></div>
     </div>
-    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-      <h3 class="font-bold mb-3"><i class="fa-solid fa-trophy text-yellow-500"></i> Creator / Affiliate Leaderboard</h3>
-      <div id="creators" class="space-y-3 text-sm"></div>
+    <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+      <h3 class="font-bold mb-4 text-base flex items-center gap-2"><i class="fa-solid fa-trophy text-brand-500"></i> Creator / Affiliate Leaders</h3>
+      <div id="creators" class="space-y-3.5 text-sm"></div>
     </div>
   </div>
+
   <div class="grid lg:grid-cols-2 gap-6">
-    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-      <h3 class="font-bold mb-3"><i class="fa-solid fa-boxes-stacked text-yellow-500"></i> สต็อกสินค้า &amp; แจ้งเตือน</h3>
-      <div id="inventory" class="space-y-2 text-sm"></div>
+    <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+      <h3 class="font-bold mb-4 text-base flex items-center gap-2"><i class="fa-solid fa-boxes-stacked text-brand-500"></i> คลังสินค้า & Alert สต็อก</h3>
+      <div id="inventory" class="space-y-2 text-sm max-h-60 overflow-y-auto pr-1"></div>
     </div>
-    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-      <h3 class="font-bold mb-3"><i class="fa-solid fa-lightbulb text-yellow-500"></i> AI Insights &amp; Dynamic Pricing</h3>
+    <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+      <h3 class="font-bold mb-4 text-base flex items-center gap-2"><i class="fa-solid fa-lightbulb text-brand-500"></i> AI Insights & Dynamic Pricing</h3>
       <div id="insights" class="space-y-3 text-sm"></div>
     </div>
   </div>
-  <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-    <h3 class="font-bold mb-3"><i class="fa-solid fa-gear text-yellow-500"></i> ตั้งค่าเชื่อมต่อ AI Backend</h3>
-    <p class="text-xs text-gray-500 mb-2">ใส่ URL ของ Cloud Function (Vertex AI / Gemini) — หากว่างหรือเชื่อมต่อไม่ได้ ระบบจะใช้ AI จำลองในเครื่องอัตโนมัติ</p>
+
+  <div class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+    <h3 class="font-bold mb-2 flex items-center gap-2"><i class="fa-solid fa-gear text-brand-500"></i> ตั้งค่าเชื่อมต่อ Vertex AI / Gemini Endpoint</h3>
+    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">วาง Cloud Function URL สำหรับเชื่อมต่อ Gemini Backend — หากว่างไว้ ระบบจะรัน Local Smart AI อัตโนมัติ</p>
     <div class="flex gap-2">
-      <input id="endpoint" class="flex-1 border rounded-lg px-3 py-2 text-sm" placeholder="https://us-central1-PROJECT.cloudfunctions.net/yellowBasketAPI">
-      <button onclick="saveEndpoint()" class="px-4 py-2 bg-yellow-400 rounded-lg font-bold text-sm">บันทึก</button>
+      <input id="endpoint" class="flex-1 border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" placeholder="https://us-central1-YOUR_PROJECT.cloudfunctions.net/yellowBasketAPI">
+      <button onclick="saveEndpoint()" class="px-5 py-2.5 bg-brand-400 hover:bg-brand-500 text-gray-900 rounded-xl font-extrabold text-sm transition-all shadow-sm">บันทึก</button>
     </div>
   </div>
 </section>
 
-<!-- ================= STUDIO ================= -->
+<!-- ================= STUDIO VIEW ================= -->
 <section id="view-studio" class="view space-y-6">
   <div class="grid lg:grid-cols-5 gap-6">
-    <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-yellow-200 shadow-sm space-y-4 h-fit">
-      <h3 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles text-yellow-500"></i> AI Content Generator</h3>
+    <div class="lg:col-span-2 bg-white dark:bg-gray-900 p-6 rounded-3xl border border-brand-200 dark:border-gray-800 shadow-sm space-y-4 h-fit">
+      <h3 class="text-lg font-black flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles text-brand-500"></i> AI Content Generator</h3>
+      
       <div>
-        <label class="text-xs font-semibold text-gray-500">สินค้า (เลือกหรือพิมพ์เอง)</label>
-        <select id="g-prod" class="w-full border rounded-lg px-3 py-2 text-sm mt-1"></select>
-        <input id="g-custom" placeholder="หรือพิมพ์ชื่อสินค้า / วาง URL ภาพ" class="w-full border rounded-lg px-3 py-2 text-sm mt-2">
+        <label class="text-xs font-bold text-gray-500 dark:text-gray-400">สินค้าเป้าหมาย</label>
+        <select id="g-prod" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3.5 py-2.5 text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-brand-400"></select>
+        <input id="g-custom" placeholder="หรือพิมพ์ชื่อสินค้า / คีย์เวิร์ดเอง..." class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3.5 py-2.5 text-sm mt-2 focus:outline-none focus:ring-2 focus:ring-brand-400">
       </div>
+
       <div class="grid grid-cols-2 gap-3">
-        <div><label class="text-xs font-semibold text-gray-500">แพลตฟอร์ม</label>
-          <select id="g-plat" class="w-full border rounded-lg px-3 py-2 text-sm mt-1"><option>TikTok</option><option>Instagram Reels</option><option>Facebook</option><option>LINE OA</option><option>YouTube Shorts</option></select></div>
-        <div><label class="text-xs font-semibold text-gray-500">โทนเสียง</label>
-          <select id="g-tone" class="w-full border rounded-lg px-3 py-2 text-sm mt-1"><option value="hype">เร้าใจ ปิดการขาย</option><option value="friendly">เป็นกันเอง</option><option value="review">รีวิวจริงจัง</option><option value="luxury">พรีเมียม</option><option value="funny">ตลก ขำๆ</option></select></div>
+        <div>
+          <label class="text-xs font-bold text-gray-500 dark:text-gray-400">แพลตฟอร์ม</label>
+          <select id="g-plat" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-sm mt-1">
+            <option>TikTok</option><option>Instagram Reels</option><option>Facebook</option><option>LINE OA</option><option>YouTube Shorts</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-500 dark:text-gray-400">โทนเสียง</label>
+          <select id="g-tone" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-sm mt-1">
+            <option value="hype">🔥 เร้าใจ ปิดการขาย</option>
+            <option value="friendly">🥰 เป็นกันเอง จริงใจ</option>
+            <option value="review">📊 รีวิวจริงจัง ละเอียด</option>
+            <option value="luxury">✨ พรีเมียม หรูหรา</option>
+            <option value="funny">😂 ตลก ขำๆ เฮฮา</option>
+          </select>
+        </div>
       </div>
+
       <div class="grid grid-cols-2 gap-3">
-        <div><label class="text-xs font-semibold text-gray-500">ภาษา</label>
-          <select id="g-lang" class="w-full border rounded-lg px-3 py-2 text-sm mt-1"><option value="th">ไทย</option><option value="en">English</option></select></div>
-        <div><label class="text-xs font-semibold text-gray-500">ความยาววิดีโอ</label>
-          <select id="g-len" class="w-full border rounded-lg px-3 py-2 text-sm mt-1"><option>15 วินาที</option><option>30 วินาที</option><option>60 วินาที</option></select></div>
+        <div>
+          <label class="text-xs font-bold text-gray-500 dark:text-gray-400">ภาษา</label>
+          <select id="g-lang" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-sm mt-1">
+            <option value="th">ไทย (Thai)</option><option value="en">English</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-500 dark:text-gray-400">ความยาวคลิป</label>
+          <select id="g-len" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-sm mt-1">
+            <option>15 วินาที</option><option>30 วินาที</option><option>60 วินาที</option>
+          </select>
+        </div>
       </div>
-      <button onclick="generateAi()" id="g-btn" class="w-full py-3 bg-yellow-400 hover:bg-yellow-500 font-extrabold rounded-lg shadow"><i class="fa-solid fa-bolt"></i> เจเนอเรตคอนเทนต์</button>
-      <button onclick="buildCalendar()" class="w-full py-2 border border-yellow-400 text-yellow-600 font-bold rounded-lg text-sm"><i class="fa-regular fa-calendar-days"></i> สร้างปฏิทินคอนเทนต์ 7 วัน</button>
+
+      <button onclick="generateAi()" id="g-btn" class="w-full py-3.5 bg-brand-400 hover:bg-brand-500 text-gray-900 font-extrabold rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-bolt"></i> สร้างสคริปต์ & คอนเทนต์ AI
+      </button>
+
+      <button onclick="buildCalendar()" class="w-full py-2.5 border border-brand-400 text-brand-600 dark:text-brand-400 font-bold rounded-xl text-sm hover:bg-brand-50 dark:hover:bg-gray-800 transition-colors">
+        <i class="fa-regular fa-calendar-days mr-1"></i> วางแผนปฏิทินคอนเทนต์ 7 วัน
+      </button>
     </div>
+
     <div class="lg:col-span-3 space-y-4">
-      <div id="g-out" class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm min-h-[240px] text-sm text-gray-500">ผลลัพธ์จะแสดงที่นี่ — ได้ทั้ง Hook, สคริปต์ตามช่วงเวลา, แคปชัน, แฮชแท็ก และ Call-to-action</div>
-      <div id="calendar" class="hidden bg-white p-5 rounded-xl border border-gray-200 shadow-sm"></div>
-      <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-        <div class="flex justify-between items-center mb-3"><h3 class="font-bold text-sm"><i class="fa-solid fa-clock-rotate-left text-yellow-500"></i> ประวัติการสร้าง</h3><button onclick="clearHistory()" class="text-xs text-gray-400 hover:text-red-500">ล้าง</button></div>
+      <div id="g-out" class="bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm min-h-[260px] text-sm text-gray-400 flex items-center justify-center text-center">
+        กดปุ่ม "สร้างสคริปต์" เพื่อรับ Hook เร้าใจ, Timeline สคริปต์วิดีโอ, แคปชัน และแฮชแท็กติดเทรนด์
+      </div>
+      <div id="calendar" class="hidden bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm"></div>
+      
+      <div class="bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-brand-500"></i> ประวัติการสร้างคอนเทนต์</h3>
+          <button onclick="clearHistory()" class="text-xs text-gray-400 hover:text-red-500">ล้างประวัติ</button>
+        </div>
         <div id="history" class="space-y-2 text-xs text-gray-500"></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ================= ORDERS ================= -->
+<!-- ================= ORDERS VIEW ================= -->
 <section id="view-orders" class="view space-y-6">
   <div class="flex flex-wrap justify-between items-center gap-3">
-    <h2 class="text-2xl font-bold">ออเดอร์ทั้งหมด</h2>
-    <button onclick="exportCsv()" class="px-4 py-2 bg-gray-900 text-yellow-300 rounded-lg text-sm font-bold"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+    <h2 class="text-2xl font-extrabold tracking-tight">รายการคำสั่งซื้อทั้งหมด</h2>
+    <button onclick="exportCsv()" class="px-4 py-2.5 bg-gray-900 dark:bg-gray-100 text-brand-400 dark:text-gray-900 rounded-xl text-sm font-extrabold shadow-md hover:bg-gray-800 transition-all flex items-center gap-2">
+      <i class="fa-solid fa-file-csv"></i> Export CSV
+    </button>
   </div>
-  <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
-    <table class="w-full text-sm"><thead class="bg-gray-50 text-gray-500 text-xs"><tr><th class="p-3 text-left">เลขที่</th><th class="p-3 text-left">ลูกค้า</th><th class="p-3 text-left">ช่องทาง</th><th class="p-3 text-right">ยอด</th><th class="p-3 text-left">สถานะ</th><th class="p-3"></th></tr></thead>
-    <tbody id="order-rows"></tbody></table>
+
+  <div class="bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 text-xs font-bold uppercase border-b border-gray-200 dark:border-gray-800">
+        <tr>
+          <th class="p-4 text-left">เลขที่ออเดอร์</th>
+          <th class="p-4 text-left">ลูกค้า</th>
+          <th class="p-4 text-left">ช่องทาง</th>
+          <th class="p-4 text-right">ยอดชำระ</th>
+          <th class="p-4 text-left">สถานะจัดส่ง</th>
+          <th class="p-4 text-center">จัดการ</th>
+        </tr>
+      </thead>
+      <tbody id="order-rows" class="divide-y divide-gray-100 dark:divide-gray-800"></tbody>
+    </table>
   </div>
-  <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-    <h3 class="font-bold mb-3"><i class="fa-solid fa-cart-arrow-down text-yellow-500"></i> กู้ตะกร้าที่ถูกทิ้ง (Abandoned Cart Recovery)</h3>
+
+  <div class="bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
+    <h3 class="font-bold mb-4 text-base flex items-center gap-2"><i class="fa-solid fa-cart-arrow-down text-brand-500"></i> กู้คืนตะกร้าสินค้าที่ถูกทิ้ง (Abandoned Cart Recovery)</h3>
     <div id="abandoned" class="space-y-3 text-sm"></div>
   </div>
 </section>
+
 </main>
 
 <!-- CART DRAWER -->
-<div id="cart-overlay" onclick="toggleCart(false)" class="hidden fixed inset-0 bg-black/40 z-40"></div>
-<aside id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
-  <div class="px-5 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-lg"><i class="fa-solid fa-cart-shopping text-yellow-500"></i> ตะกร้าของคุณ</h3><button onclick="toggleCart(false)" class="text-gray-400 text-xl"><i class="fa-solid fa-xmark"></i></button></div>
-  <div id="cart-items" class="flex-1 overflow-y-auto p-5 space-y-4"></div>
-  <div class="border-t p-5 space-y-3 text-sm">
-    <div class="flex gap-2"><input id="coupon" placeholder="โค้ดส่วนลด (YELLOW10 / AI50 / FREESHIP)" class="flex-1 border rounded-lg px-3 py-2 text-xs"><button onclick="applyCoupon()" class="px-3 bg-gray-900 text-yellow-300 rounded-lg text-xs font-bold">ใช้โค้ด</button></div>
-    <div id="cart-sum" class="space-y-1"></div>
-    <button onclick="openCheckout()" class="w-full py-3 bg-yellow-400 hover:bg-yellow-500 rounded-lg font-extrabold shadow">ชำระเงิน / ยืนยันออเดอร์</button>
+<div id="cart-overlay" onclick="toggleCart(false)" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 transition-opacity"></div>
+<aside id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white dark:bg-gray-900 z-50 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col border-l border-gray-200 dark:border-gray-800">
+  <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+    <h3 class="font-extrabold text-lg flex items-center gap-2"><i class="fa-solid fa-cart-shopping text-brand-500"></i> ตะกร้าของคุณ</h3>
+    <button onclick="toggleCart(false)" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-gray-700 dark:hover:text-white flex items-center justify-center transition-colors">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  
+  <div id="cart-items" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
+  
+  <div class="border-t border-gray-200 dark:border-gray-800 p-6 space-y-4 text-sm bg-gray-50/50 dark:bg-gray-800/30">
+    <div class="flex gap-2">
+      <input id="coupon" placeholder="โค้ดส่วนลด (YELLOW10 / AI50 / FREESHIP)" class="flex-1 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl px-3.5 py-2 text-xs uppercase focus:outline-none focus:ring-2 focus:ring-brand-400">
+      <button onclick="applyCoupon()" class="px-4 bg-gray-900 dark:bg-gray-100 text-brand-400 dark:text-gray-900 rounded-xl text-xs font-extrabold">ใช้โค้ด</button>
+    </div>
+    <div id="cart-sum" class="space-y-2"></div>
+    <button onclick="openCheckout()" class="w-full py-3.5 bg-brand-400 hover:bg-brand-500 text-gray-900 font-extrabold rounded-xl shadow-md transition-all active:scale-95 text-base">
+      ชำระเงิน / ยืนยันออเดอร์
+    </button>
   </div>
 </aside>
 
 <!-- CHECKOUT MODAL -->
-<div id="checkout-modal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-2xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-6 pop" id="checkout-body"></div>
+<div id="checkout-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-6 md:p-8 shadow-2xl border border-gray-200 dark:border-gray-800 pop" id="checkout-body"></div>
 </div>
 
-<!-- AI ASSISTANT -->
-<button onclick="toggleChat()" class="fixed bottom-5 right-5 z-30 w-14 h-14 rounded-full bg-gray-900 text-yellow-300 shadow-xl text-xl"><i class="fa-solid fa-robot"></i></button>
-<div id="chat-box" class="hidden fixed bottom-24 right-5 z-30 w-80 max-w-[calc(100vw-2.5rem)] h-96 bg-white border border-gray-200 rounded-2xl shadow-2xl flex flex-col pop">
-  <div class="px-4 py-3 bg-yellow-400 rounded-t-2xl font-bold text-sm text-gray-900"><i class="fa-solid fa-robot"></i> น้องเหลือง · AI ผู้ช่วยช้อปปิ้ง</div>
-  <div id="chat-log" class="flex-1 overflow-y-auto p-3 space-y-2 text-sm"></div>
-  <div id="chat-quick" class="px-3 pb-1 flex gap-1 flex-wrap"></div>
-  <div class="p-2 border-t flex gap-2"><input id="chat-input" onkeydown="if(event.key==='Enter')askAssistant()" placeholder="ถามหาสินค้า เช่น งบ 1000..." class="flex-1 border rounded-lg px-3 py-2 text-xs"><button onclick="askAssistant()" class="px-3 bg-yellow-400 rounded-lg"><i class="fa-solid fa-paper-plane"></i></button></div>
+<!-- AI ASSISTANT CHATBOT -->
+<button onclick="toggleChat()" class="fixed bottom-6 right-6 z-30 w-14 h-14 rounded-full bg-gray-900 dark:bg-gray-100 text-brand-400 dark:text-gray-900 shadow-2xl text-2xl flex items-center justify-center hover:scale-105 active:scale-95 transition-transform border-2 border-brand-400">
+  <i class="fa-solid fa-robot"></i>
+</button>
+
+<div id="chat-box" class="hidden fixed bottom-24 right-6 z-30 w-80 max-w-[calc(100vw-3rem)] h-[440px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl shadow-2xl flex flex-col overflow-hidden pop">
+  <div class="px-5 py-3.5 bg-brand-400 font-extrabold text-sm text-gray-900 flex justify-between items-center shadow-sm">
+    <span class="flex items-center gap-2"><i class="fa-solid fa-robot"></i> น้องเหลือง AI ผู้ช่วยช้อป</span>
+    <button onclick="toggleChat()" class="text-gray-800 text-lg"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div id="chat-log" class="flex-1 overflow-y-auto p-4 space-y-3 text-sm"></div>
+  <div id="chat-quick" class="px-3 pb-2 flex gap-1.5 flex-wrap"></div>
+  <div class="p-3 border-t border-gray-200 dark:border-gray-800 flex gap-2 bg-white dark:bg-gray-900">
+    <input id="chat-input" onkeydown="if(event.key==='Enter')askAssistant()" placeholder="พิมพ์ถามหาสินค้า หรือบอกงบได้เลย..." class="flex-1 border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-400">
+    <button onclick="askAssistant()" class="px-3.5 bg-brand-400 text-gray-900 rounded-xl font-bold"><i class="fa-solid fa-paper-plane"></i></button>
+  </div>
 </div>
 
-<!-- TOASTS + social proof -->
-<div id="toasts" class="fixed top-20 right-4 z-[60] space-y-2"></div>
-<div id="proof" class="hidden fixed bottom-5 left-5 z-30 bg-white border border-gray-200 rounded-xl shadow-lg px-4 py-3 text-xs max-w-xs pop"></div>
+<!-- TOAST & SOCIAL PROOF -->
+<div id="toasts" class="fixed top-20 right-4 z-[60] space-y-2 pointer-events-none"></div>
+<div id="proof" class="hidden fixed bottom-6 left-6 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl px-4 py-3 text-xs max-w-xs pop"></div>
 
 <script>
-/* ============ DATA ============ */
-const CATS=['ทั้งหมด','AI Gadget','สมาร์ทโฮม','ไลฟ์สไตล์','ออฟฟิศ'];
-const PRODUCTS=[
+/* ============ DATA STATE ============ */
+const CATS = ['ทั้งหมด', 'AI Gadget', 'สมาร์ทโฮม', 'ไลฟ์สไตล์', 'ออฟฟิศ'];
+const PRODUCTS = [
  {id:'p1',name:'Smart AI Desk Companion',cat:'AI Gadget',price:2490,old:3290,stock:24,rating:4.8,sold:1280,icon:'fa-robot',desc:'อุปกรณ์ AI ช่วยจัดลำดับงานและวิเคราะห์ยอดขายอัตโนมัติ'},
- {id:'p2',name:'AI Voice Translator Earbuds',cat:'AI Gadget',price:1890,old:2590,stock:6,rating:4.6,sold:964,icon:'fa-headphones',desc:'หูฟังแปลภาษาเรียลไทม์ 40 ภาษา'},
- {id:'p3',name:'Smart Home Hub Mini',cat:'สมาร์ทโฮม',price:1290,old:1790,stock:52,rating:4.7,sold:2210,icon:'fa-house-signal',desc:'ศูนย์ควบคุมบ้านอัจฉริยะ รองรับ Matter'},
- {id:'p4',name:'Robot Vacuum Lite',cat:'สมาร์ทโฮม',price:4590,old:6490,stock:11,rating:4.5,sold:740,icon:'fa-broom',desc:'หุ่นยนต์ดูดฝุ่น แผนที่ LiDAR'},
- {id:'p5',name:'Aroma Mood Diffuser',cat:'ไลฟ์สไตล์',price:590,old:890,stock:120,rating:4.9,sold:5320,icon:'fa-spa',desc:'เครื่องพ่นอโรมาปรับแสงตามอารมณ์'},
- {id:'p6',name:'Portable Mini Blender',cat:'ไลฟ์สไตล์',price:490,old:790,stock:3,rating:4.4,sold:3180,icon:'fa-blender',desc:'เครื่องปั่นพกพา ชาร์จ USB-C'},
- {id:'p7',name:'Ergo Standing Desk Pad',cat:'ออฟฟิศ',price:990,old:1390,stock:40,rating:4.6,sold:870,icon:'fa-chair',desc:'แผ่นรองยืนทำงานลดอาการปวดเมื่อย'},
- {id:'p8',name:'AI Webcam 4K Auto-Frame',cat:'ออฟฟิศ',price:2190,old:2990,stock:18,rating:4.7,sold:690,icon:'fa-video',desc:'เว็บแคม 4K ติดตามใบหน้าอัตโนมัติ'}
+ {id:'p2',name:'AI Voice Translator Earbuds',cat:'AI Gadget',price:1890,old:2590,stock:6,rating:4.6,sold:964,icon:'fa-headphones',desc:'หูฟังแปลภาษาเรียลไทม์ 40 ภาษา ตัดเสียงรบกวน'},
+ {id:'p3',name:'Smart Home Hub Mini',cat:'สมาร์ทโฮม',price:1290,old:1790,stock:52,rating:4.7,sold:2210,icon:'fa-house-signal',desc:'ศูนย์ควบคุมบ้านอัจฉริยะ รองรับระบบ Matter & Zigbee'},
+ {id:'p4',name:'Robot Vacuum Lite',cat:'สมาร์ทโฮม',price:4590,old:6490,stock:11,rating:4.5,sold:740,icon:'fa-broom',desc:'หุ่นยนต์ดูดฝุ่น แผนที่ LiDAR ความละเอียดสูง'},
+ {id:'p5',name:'Aroma Mood Diffuser',cat:'ไลฟ์สไตล์',price:590,old:890,stock:120,rating:4.9,sold:5320,icon:'fa-spa',desc:'เครื่องพ่นอโรมาปรับแสงอารมณ์ตามบทเพลง'},
+ {id:'p6',name:'Portable Mini Blender',cat:'ไลฟ์สไตล์',price:490,old:790,stock:3,rating:4.4,sold:3180,icon:'fa-blender',desc:'เครื่องปั่นพกพา ชาร์จเร็วผ่าน USB-C'},
+ {id:'p7',name:'Ergo Standing Desk Pad',cat:'ออฟฟิศ',price:990,old:1390,stock:40,rating:4.6,sold:870,icon:'fa-chair',desc:'แผ่นรองยืนทำงานเพื่อสุขภาพ ลดอาการปวดเมื่อย'},
+ {id:'p8',name:'AI Webcam 4K Auto-Frame',cat:'ออฟฟิศ',price:2190,old:2990,stock:18,rating:4.7,sold:690,icon:'fa-video',desc:'เว็บแคม 4K ซูมและติดตามใบหน้าอัตโนมัติ'}
 ];
-const CHANNELS=[
+
+const CHANNELS = [
  {k:'tiktok',n:'TikTok Shop Affiliate',c:'#eab308',share:50,icon:'fa-brands fa-tiktok'},
  {k:'shopee',n:'Shopee Sync',c:'#ee4d2d',share:20,icon:'fa-bag-shopping'},
  {k:'web',n:'Direct Web Store',c:'#111827',share:20,icon:'fa-globe'},
  {k:'lazada',n:'Lazada Sync',c:'#2563eb',share:10,icon:'fa-store'},
  {k:'line',n:'LINE OA Shop',c:'#06c755',share:0,icon:'fa-brands fa-line'}
 ];
-const CREATORS=[{n:'@น้องมิ้นท์รีวิว',s:48200,o:312},{n:'@gadgetพี่โอ๊ต',s:36900,o:241},{n:'@บ้านนี้มีของดี',s:27400,o:198},{n:'@ลิซ่าไลฟ์สไตล์',s:19800,o:133}];
-const COUPONS={YELLOW10:{t:'pct',v:10},AI50:{t:'amt',v:50},FREESHIP:{t:'ship',v:0}};
-const STATUS=['รอชำระเงิน','เตรียมจัดส่ง','จัดส่งแล้ว','สำเร็จ'];
-const STATUS_CLS=['bg-gray-200 text-gray-700','bg-yellow-100 text-yellow-800','bg-blue-100 text-blue-700','bg-green-100 text-green-700'];
 
-/* ============ STATE ============ */
-const load=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??d}catch(e){return d}};
-const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
-let cart=load('yb_cart',[]), wish=load('yb_wish',[]), coupon=load('yb_coupon',null);
-let orders=load('yb_orders',null)||[
+const CREATORS = [{n:'@น้องมิ้นท์รีวิว',s:48200,o:312},{n:'@gadgetพี่โอ๊ต',s:36900,o:241},{n:'@บ้านนี้มีของดี',s:27400,o:198},{n:'@ลิซ่าไลฟ์สไตล์',s:19800,o:133}];
+const COUPONS = {YELLOW10:{t:'pct',v:10},AI50:{t:'amt',v:50},FREESHIP:{t:'ship',v:0}};
+const STATUS = ['รอชำระเงิน','เตรียมจัดส่ง','จัดส่งแล้ว','สำเร็จ'];
+const STATUS_CLS = ['bg-gray-200 text-gray-800','bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300','bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300','bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300'];
+
+/* ============ PERSISTENCE ============ */
+const load = (k,d) => { try { const v=JSON.parse(localStorage.getItem(k)); return v??d } catch(e){ return d } };
+const save = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch(e){} };
+
+let cart = load('yb_cart', []), wish = load('yb_wish', []), coupon = load('yb_coupon', null);
+let orders = load('yb_orders', null) || [
  {id:'YB-10231',name:'คุณสมชาย',ch:'tiktok',total:2490,st:3,t:Date.now()-86400000*2,items:[['p1',1]]},
  {id:'YB-10232',name:'คุณน้ำฝน',ch:'shopee',total:1290,st:2,t:Date.now()-86400000,items:[['p3',1]]},
  {id:'YB-10233',name:'คุณปอ',ch:'tiktok',total:1180,st:1,t:Date.now()-3600000*5,items:[['p5',2]]},
  {id:'YB-10234',name:'คุณเมย์',ch:'lazada',total:4590,st:0,t:Date.now()-3600000,items:[['p4',1]]}
 ];
-let stockMap=load('yb_stock',null)||Object.fromEntries(PRODUCTS.map(p=>[p.id,p.stock]));
-let hist=load('yb_hist',[]);
-let sync=load('yb_sync',{tiktok:true,shopee:true,web:true,lazada:true,line:false});
-let lang=load('yb_lang','th'), dark=load('yb_dark',false);
-let endpoint=load('yb_endpoint','');
-let cat='ทั้งหมด', tab='store', charts={};
-let liveStats={sales:0,clicks:0,hearts:0}, pinnedId='p1', funnel={visitors:12400,views:5200};
-const abandonedSeed=[{n:'คุณแพร',items:'Robot Vacuum Lite ×1',v:4590},{n:'คุณบอย',items:'AI Webcam 4K ×1, Desk Pad ×1',v:3180}];
+let stockMap = load('yb_stock', null) || Object.fromEntries(PRODUCTS.map(p=>[p.id,p.stock]));
+let hist = load('yb_hist', []);
+let sync = load('yb_sync', {tiktok:true,shopee:true,web:true,lazada:true,line:false});
+let lang = load('yb_lang', 'th'), dark = load('yb_dark', false);
+let endpoint = load('yb_endpoint', '');
+let cat = 'ทั้งหมด', tab = 'store', charts = {};
+let liveStats = {sales:0, clicks:0, hearts:0}, pinnedId = 'p1', funnel = {visitors:12400, views:5200};
+const abandonedSeed = [{n:'คุณแพร',items:'Robot Vacuum Lite ×1',v:4590},{n:'คุณบอย',items:'AI Webcam 4K ×1, Desk Pad ×1',v:3180}];
 
-/* ============ HELPERS ============ */
-const $=id=>document.getElementById(id);
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const baht=n=>'฿'+Math.round(n).toLocaleString('th-TH');
-const P=id=>PRODUCTS.find(p=>p.id===id);
-function toast(msg,type='ok'){
-  const d=document.createElement('div');
-  d.className='pop px-4 py-3 rounded-lg shadow-lg text-sm font-medium '+(type==='err'?'bg-red-600 text-white':'bg-gray-900 text-yellow-300');
-  d.textContent=msg;$('toasts').appendChild(d);setTimeout(()=>d.remove(),2800);
+/* ============ UTILS ============ */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const baht = n => '฿' + Math.round(n).toLocaleString('th-TH');
+const P = id => PRODUCTS.find(p=>p.id===id);
+
+function toast(msg, type='ok'){
+  const d = document.createElement('div');
+  d.className = 'pop px-4 py-3 rounded-xl shadow-2xl text-xs font-bold pointer-events-auto flex items-center gap-2 ' + (type==='err'?'bg-red-600 text-white':'bg-gray-900 text-brand-400 border border-brand-400/30');
+  d.innerHTML = (type==='err'?'<i class="fa-solid fa-circle-exclamation"></i>':'<i class="fa-solid fa-circle-check"></i>') + esc(msg);
+  $('toasts').appendChild(d); setTimeout(() => d.remove(), 3000);
 }
-const I18N={
+
+const I18N = {
  th:{tab_store:'หน้าร้าน',tab_live:'ไลฟ์สด',tab_dash:'แดชบอร์ด',tab_studio:'AI Studio',tab_orders:'ออเดอร์',hero_title:'ปักตะกร้าเหลือง ลดสูงสุด 40%',hero_sub:'ใช้โค้ด YELLOW10 ลดเพิ่ม 10% · ส่งฟรีเมื่อซื้อครบ ฿999',ends_in:'สิ้นสุดใน'},
  en:{tab_store:'Store',tab_live:'Live',tab_dash:'Dashboard',tab_studio:'AI Studio',tab_orders:'Orders',hero_title:'Yellow Basket Sale — up to 40% off',hero_sub:'Use code YELLOW10 for 10% extra · Free shipping over ฿999',ends_in:'Ends in'}
 };
+
 function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(e=>{e.textContent=I18N[lang][e.dataset.i18n]||e.textContent});
-  $('lang-btn').textContent=lang.toUpperCase();document.documentElement.lang=lang;
+  $('lang-btn').textContent = lang.toUpperCase(); document.documentElement.lang = lang;
 }
-function toggleLang(){lang=lang==='th'?'en':'th';save('yb_lang',lang);applyLang()}
-function applyDark(){document.documentElement.classList.toggle('dark',dark);$('dark-ico').className='fa-solid '+(dark?'fa-sun':'fa-moon');if(tab==='dash')renderDash()}
-function toggleDark(){dark=!dark;save('yb_dark',dark);applyDark()}
+function toggleLang(){ lang = lang==='th'?'en':'th'; save('yb_lang', lang); applyLang() }
 
-/* ============ TABS ============ */
+function applyDark(){
+  document.documentElement.classList.toggle('dark', dark);
+  $('dark-ico').className = 'fa-solid ' + (dark?'fa-sun':'fa-moon');
+  if(tab==='dash') renderDash();
+}
+function toggleDark(){ dark = !dark; save('yb_dark', dark); applyDark() }
+
+/* ============ ROUTER & TABS ============ */
 function switchTab(t){
-  tab=t;
+  tab = t;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  $('view-'+t).classList.add('active');
-  document.querySelectorAll('.tabbtn').forEach(b=>{const on=b.dataset.tab===t;b.classList.toggle('bg-white',on);b.classList.toggle('shadow-sm',on);b.classList.toggle('text-gray-900',on);b.classList.toggle('text-gray-500',!on)});
-  if(t==='dash')renderDash();
-  if(t==='orders')renderOrders();
-  if(t==='live')renderLive();
-  if(t==='studio')renderStudio();
-  window.scrollTo({top:0,behavior:'smooth'});
+  const el = $('view-'+t); if(el) el.classList.add('active');
+  
+  document.querySelectorAll('.tabbtn').forEach(b => {
+    const on = b.dataset.tab === t;
+    b.classList.toggle('bg-white', on); b.classList.toggle('dark:bg-gray-800', on);
+    b.classList.toggle('shadow-sm', on); b.classList.toggle('text-gray-900', on);
+    b.classList.toggle('dark:text-white', on); b.classList.toggle('text-gray-500', !on);
+  });
+  
+  if(t==='dash') renderDash();
+  if(t==='orders') renderOrders();
+  if(t==='live') renderLive();
+  if(t==='studio') renderStudio();
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 document.querySelectorAll('.tabbtn').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
 
-/* ============ STORE ============ */
+/* ============ STORE LOGIC ============ */
 function renderChips(){
-  $('chips').innerHTML=CATS.map(c=>`<button class="chip whitespace-nowrap border border-gray-200 bg-white px-4 py-2 rounded-full text-sm font-medium ${c===cat?'on':''}" onclick="setCat('${c}')">${c}</button>`).join('');
+  $('chips').innerHTML = CATS.map(c => `<button class="chip whitespace-nowrap border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-2 rounded-xl text-xs font-semibold ${c===cat?'on':''}" onclick="setCat('${c}')">${c}</button>`).join('');
 }
-function setCat(c){cat=c;renderChips();renderProducts()}
+function setCat(c){ cat = c; renderChips(); renderProducts() }
+
 function renderProducts(){
-  const q=$('search').value.trim().toLowerCase(), s=$('sort').value;
-  let list=PRODUCTS.filter(p=>(cat==='ทั้งหมด'||p.cat===cat)&&(p.name+p.desc+p.cat).toLowerCase().includes(q));
-  list.sort((a,b)=>s==='low'?a.price-b.price:s==='high'?b.price-a.price:s==='rate'?b.rating-a.rating:b.sold-a.sold);
-  if(!list.length){$('product-grid').innerHTML='<p class="col-span-full text-center text-gray-400 py-12">ไม่พบสินค้าที่ค้นหา</p>';return}
-  $('product-grid').innerHTML=list.map(p=>{
-    const st=stockMap[p.id], off=Math.round((1-p.price/p.old)*100), w=wish.includes(p.id);
-    return `<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-3 flex flex-col justify-between pop">
-      <div>
-        <div class="relative h-32 bg-yellow-50 rounded-lg flex items-center justify-center mb-3 border border-yellow-100">
-          <i class="fa-solid ${p.icon} text-4xl text-yellow-500"></i>
-          <span class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">-${off}%</span>
-          <button onclick="toggleWish('${p.id}')" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 shadow text-sm ${w?'text-red-500':'text-gray-400'}"><i class="fa-${w?'solid':'regular'} fa-heart"></i></button>
-        </div>
-        <h3 class="text-sm font-bold text-gray-900 leading-snug">${esc(p.name)}</h3>
-        <p class="text-xs text-gray-500 mt-1 line-clamp-2">${esc(p.desc)}</p>
-        <div class="text-xs mt-2 text-gray-500"><i class="fa-solid fa-star text-yellow-400"></i> ${p.rating} · ขายแล้ว ${p.sold.toLocaleString()}</div>
-        ${st<=0?'<div class="text-xs text-red-500 font-bold mt-1">สินค้าหมด</div>':st<=10?`<div class="text-xs text-red-500 font-bold mt-1"><i class="fa-solid fa-fire"></i> เหลือ ${st} ชิ้นสุดท้าย</div>`:''}
-      </div>
-      <div class="mt-3">
-        <div class="flex items-baseline gap-2"><span class="text-lg font-extrabold text-gray-900">${baht(p.price)}</span><span class="text-xs line-through text-gray-400">${baht(p.old)}</span></div>
-        <button ${st<=0?'disabled':''} onclick="addToCart('${p.id}')" class="mt-2 w-full px-3 py-2 bg-yellow-400 text-gray-900 font-bold rounded-lg hover:bg-yellow-500 text-sm shadow-sm disabled:opacity-40"><i class="fa-solid fa-cart-plus mr-1"></i> เพิ่มลงตะกร้า</button>
-      </div></div>`}).join('');
-}
-function toggleWish(id){wish=wish.includes(id)?wish.filter(x=>x!==id):[...wish,id];save('yb_wish',wish);renderProducts()}
-function voiceSearch(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR)return toast('เบราว์เซอร์นี้ไม่รองรับการค้นหาด้วยเสียง','err');
-  const r=new SR();r.lang='th-TH';r.onresult=e=>{$('search').value=e.results[0][0].transcript;renderProducts()};r.onerror=()=>toast('ฟังเสียงไม่สำเร็จ','err');r.start();toast('กำลังฟัง... พูดชื่อสินค้าได้เลย');
-}
-function startCountdown(){
-  let end=load('yb_end',0);if(end<Date.now()){end=Date.now()+6*3600*1000+23*60000;save('yb_end',end)}
-  const tick=()=>{let s=Math.max(0,Math.floor((end-Date.now())/1000));const h=String(Math.floor(s/3600)).padStart(2,'0'),m=String(Math.floor(s%3600/60)).padStart(2,'0'),x=String(s%60).padStart(2,'0');
-    $('countdown').innerHTML=[h,m,x].map(v=>`<span class="bg-gray-900 rounded-lg px-3 py-2">${v}</span>`).join('<span class="text-gray-900 self-center">:</span>')};
-  tick();setInterval(tick,1000);
-}
-
-/* ============ CART ============ */
-function addToCart(id,qty=1,fromLive=false){
-  const st=stockMap[id], ex=cart.find(c=>c.id===id), cur=ex?ex.qty:0;
-  if(cur+qty>st)return toast('สต็อกไม่พอ เหลือ '+st+' ชิ้น','err');
-  ex?ex.qty+=qty:cart.push({id,qty});
-  persistCart();funnel.views+=1;toast('เพิ่ม '+P(id).name+' แล้ว');
-  if(fromLive){liveStats.clicks++;updateLiveStats()}
-  syncRemote({action:'addToCart',item:{id,qty}});
-}
-function persistCart(){save('yb_cart',cart);renderCart()}
-function changeQty(id,d){const c=cart.find(x=>x.id===id);if(!c)return;const n=c.qty+d;if(n<=0)cart=cart.filter(x=>x.id!==id);else if(n>stockMap[id])return toast('สต็อกไม่พอ','err');else c.qty=n;persistCart()}
-function calc(){
-  const sub=cart.reduce((s,c)=>s+P(c.id).price*c.qty,0);
-  let disc=0,ship=sub>=999||sub===0?0:40;
-  if(coupon&&sub>0){const cp=COUPONS[coupon];if(cp.t==='pct')disc=sub*cp.v/100;if(cp.t==='amt')disc=Math.min(cp.v,sub);if(cp.t==='ship')ship=0}
-  return {sub,disc,ship,total:Math.max(0,sub-disc+ship)};
-}
-function renderCart(){
-  const n=cart.reduce((s,c)=>s+c.qty,0);$('cart-badge').textContent=n;
-  $('cart-items').innerHTML=cart.length?cart.map(c=>{const p=P(c.id);return `<div class="flex gap-3 items-center">
-    <div class="w-14 h-14 rounded-lg bg-yellow-50 flex items-center justify-center"><i class="fa-solid ${p.icon} text-xl text-yellow-500"></i></div>
-    <div class="flex-1"><div class="text-sm font-bold text-gray-900 leading-tight">${esc(p.name)}</div><div class="text-xs text-gray-500">${baht(p.price)}</div>
-      <div class="flex items-center gap-2 mt-1"><button onclick="changeQty('${p.id}',-1)" class="w-6 h-6 rounded bg-gray-100">−</button><span class="text-sm w-5 text-center">${c.qty}</span><button onclick="changeQty('${p.id}',1)" class="w-6 h-6 rounded bg-gray-100">+</button></div></div>
-    <div class="font-bold text-sm">${baht(p.price*c.qty)}</div></div>`}).join(''):'<p class="text-gray-400 text-center py-10">ไม่มีสินค้าในตะกร้า</p>';
-  const t=calc();
-  $('cart-sum').innerHTML=`<div class="flex justify-between"><span>รวมสินค้า</span><span>${baht(t.sub)}</span></div>
-   ${t.disc?`<div class="flex justify-between text-green-600"><span>ส่วนลด (${coupon})</span><span>-${baht(t.disc)}</span></div>`:''}
-   <div class="flex justify-between"><span>ค่าจัดส่ง</span><span>${t.ship?baht(t.ship):'ฟรี'}</span></div>
-   <div class="flex justify-between font-bold text-base text-gray-900 pt-2 border-t"><span>ยอดชำระสุทธิ</span><span>${baht(t.total)}</span></div>
-   ${t.sub>0&&t.sub<999?`<div class="text-xs text-yellow-600">ซื้อเพิ่มอีก ${baht(999-t.sub)} ส่งฟรี!</div>`:''}`;
-}
-function applyCoupon(){const c=$('coupon').value.trim().toUpperCase();if(!COUPONS[c])return toast('โค้ดไม่ถูกต้อง','err');coupon=c;save('yb_coupon',c);renderCart();toast('ใช้โค้ด '+c+' สำเร็จ')}
-function toggleCart(open){$('cart-drawer').classList.toggle('translate-x-full',!open);$('cart-overlay').classList.toggle('hidden',!open)}
-
-/* ============ CHECKOUT ============ */
-let payMethod='promptpay';
-function openCheckout(){
-  if(!cart.length)return toast('ตะกร้ายังว่างอยู่','err');
-  toggleCart(false);payMethod='promptpay';drawCheckout();$('checkout-modal').classList.remove('hidden');
-}
-function closeCheckout(){$('checkout-modal').classList.add('hidden')}
-function fakeQr(seed){
-  let h=0;for(const ch of seed)h=(h*31+ch.charCodeAt(0))>>>0;
-  let cells='';const N=25;
-  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
-    const finder=(x<7&&y<7)||(x>N-8&&y<7)||(x<7&&y>N-8);
-    let on;if(finder){const lx=x%(N-7>x?100:100);on=true}else{h=(h*1103515245+12345)>>>0;on=(h>>>16)%2===0}
-    if(finder){const fx=x<7?x:x-(N-7),fy=y<7?y:y-(N-7);on=fx===0||fx===6||fy===0||fy===6||(fx>=2&&fx<=4&&fy>=2&&fy<=4)}
-    if(on)cells+=`<rect x="${x}" y="${y}" width="1" height="1"/>`;
+  const q = $('search').value.trim().toLowerCase(), s = $('sort').value;
+  let list = PRODUCTS.filter(p => (cat==='ทั้งหมด'||p.cat===cat) && (p.name+p.desc+p.cat).toLowerCase().includes(q));
+  list.sort((a,b) => s==='low'?a.price-b.price : s==='high'?b.price-a.price : s==='rate'?b.rating-a.rating : b.sold-a.sold);
+  
+  if(!list.length){
+    $('product-grid').innerHTML = '<div class="col-span-full text-center text-gray-400 py-16"><i class="fa-solid fa-box-open text-4xl mb-2 block"></i>ไม่พบสินค้าที่ตรงกับการค้นหา</div>';
+    return;
   }
-  return `<svg viewBox="0 0 ${N} ${N}" class="w-44 h-44 bg-white p-2 rounded-lg border" fill="#111827">${cells}</svg>`;
+  
+  $('product-grid').innerHTML = list.map(p => {
+    const st = stockMap[p.id], off = Math.round((1-p.price/p.old)*100), w = wish.includes(p.id);
+    return `<div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 p-3.5 flex flex-col justify-between pop group hover:border-brand-400 transition-all">
+      <div>
+        <div class="relative h-36 bg-brand-50 dark:bg-gray-800/60 rounded-xl flex items-center justify-center mb-3 border border-brand-100 dark:border-gray-800 overflow-hidden">
+          <i class="fa-solid ${p.icon} text-5xl text-brand-500 transform group-hover:scale-110 transition-transform"></i>
+          <span class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded-md">-${off}%</span>
+          <button onclick="toggleWish('${p.id}')" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 dark:bg-gray-900/90 shadow text-xs ${w?'text-red-500':'text-gray-400'} flex items-center justify-center transition-colors">
+            <i class="fa-${w?'solid':'regular'} fa-heart"></i>
+          </button>
+        </div>
+        <h3 class="text-sm font-bold text-gray-900 dark:text-white leading-snug line-clamp-1">${esc(p.name)}</h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">${esc(p.desc)}</p>
+        <div class="text-[11px] mt-2 text-gray-500 dark:text-gray-400 flex items-center gap-1">
+          <i class="fa-solid fa-star text-yellow-400"></i> <span class="font-bold text-gray-800 dark:text-gray-200">${p.rating}</span> · ขายแล้ว ${p.sold.toLocaleString()} ชิ้น
+        </div>
+        ${st<=0?'<div class="text-[11px] text-red-500 font-bold mt-1">สินค้าหมดชั่วคราว</div>':st<=10?`<div class="text-[11px] text-red-500 font-bold mt-1"><i class="fa-solid fa-fire"></i> เหลือเพียง ${st} ชิ้นสุดท้าย</div>`:''}
+      </div>
+      <div class="mt-4">
+        <div class="flex items-baseline gap-2">
+          <span class="text-lg font-black text-gray-900 dark:text-white">${baht(p.price)}</span>
+          <span class="text-xs line-through text-gray-400">${baht(p.old)}</span>
+        </div>
+        <button ${st<=0?'disabled':''} onclick="addToCart('${p.id}')" class="mt-2 w-full py-2.5 bg-brand-400 text-gray-900 font-extrabold rounded-xl hover:bg-brand-500 text-xs shadow-sm disabled:opacity-40 transition-all flex items-center justify-center gap-1.5 active:scale-95">
+          <i class="fa-solid fa-cart-plus"></i> เพิ่มลงตะกร้า
+        </button>
+      </div>
+    </div>`}).join('');
 }
+
+function toggleWish(id){ wish = wish.includes(id)?wish.filter(x=>x!==id):[...wish,id]; save('yb_wish', wish); renderProducts() }
+
+function voiceSearch(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return toast('เบราว์เซอร์นี้ไม่รองรับการค้นหาด้วยเสียง', 'err');
+  const r = new SR(); r.lang = lang==='th'?'th-TH':'en-US';
+  const btn = $('voice-btn');
+  btn.classList.add('text-red-500', 'animate-pulse');
+  r.onresult = e => {
+    $('search').value = e.results[0][0].transcript;
+    btn.classList.remove('text-red-500', 'animate-pulse');
+    renderProducts();
+  };
+  r.onerror = () => { btn.classList.remove('text-red-500', 'animate-pulse'); toast('รับเสียงไม่สำเร็จ', 'err') };
+  r.start(); toast('กำลังฟังเสียงพูดของคุณ...');
+}
+
+function startCountdown(){
+  let end = load('yb_end', 0);
+  if(end < Date.now()){ end = Date.now() + 6*3600*1000 + 23*60000; save('yb_end', end) }
+  const tick = () => {
+    let s = Math.max(0, Math.floor((end - Date.now())/1000));
+    const h = String(Math.floor(s/3600)).padStart(2,'0');
+    const m = String(Math.floor(s%3600/60)).padStart(2,'0');
+    const x = String(s%60).padStart(2,'0');
+    $('countdown').innerHTML = [h,m,x].map(v => `<span class="bg-gray-900 dark:bg-black rounded-lg px-2.5 py-1 text-brand-400 border border-white/10">${v}</span>`).join('<span class="text-gray-900 dark:text-white self-center">:</span>');
+  };
+  tick(); setInterval(tick, 1000);
+}
+
+/* ============ CART & CHECKOUT ============ */
+function addToCart(id, qty=1, fromLive=false){
+  const st = stockMap[id], ex = cart.find(c=>c.id===id), cur = ex?ex.qty:0;
+  if(cur + qty > st) return toast('สินค้าในสต็อกไม่พอ (เหลือ '+st+' ชิ้น)', 'err');
+  ex ? ex.qty += qty : cart.push({id, qty});
+  persistCart(); funnel.views += 1; toast('เพิ่ม '+P(id).name+' เรียบร้อยแล้ว');
+  if(fromLive){ liveStats.clicks++; updateLiveStats() }
+}
+function persistCart(){ save('yb_cart', cart); renderCart() }
+
+function changeQty(id, d){
+  const c = cart.find(x=>x.id===id); if(!c) return;
+  const n = c.qty + d;
+  if(n <= 0) cart = cart.filter(x=>x.id!==id);
+  else if(n > stockMap[id]) return toast('สินค้าในสต็อกไม่พอ', 'err');
+  else c.qty = n;
+  persistCart();
+}
+
+function calc(){
+  const sub = cart.reduce((s,c)=>s+P(c.id).price*c.qty, 0);
+  let disc = 0, ship = (sub>=999 || sub===0) ? 0 : 40;
+  if(coupon && sub>0){
+    const cp = COUPONS[coupon];
+    if(cp.t==='pct') disc = sub*cp.v/100;
+    if(cp.t==='amt') disc = Math.min(cp.v, sub);
+    if(cp.t==='ship') ship = 0;
+  }
+  return { sub, disc, ship, total: Math.max(0, sub - disc + ship) };
+}
+
+function renderCart(){
+  const n = cart.reduce((s,c)=>s+c.qty, 0); $('cart-badge').textContent = n;
+  $('cart-items').innerHTML = cart.length ? cart.map(c => {
+    const p = P(c.id);
+    return `<div class="flex gap-3 items-center bg-gray-50 dark:bg-gray-800/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800">
+      <div class="w-14 h-14 rounded-xl bg-brand-50 dark:bg-gray-700 flex items-center justify-center shrink-0">
+        <i class="fa-solid ${p.icon} text-2xl text-brand-500"></i>
+      </div>
+      <div class="flex-1 min-w-0">
+        <div class="text-xs font-bold text-gray-900 dark:text-white truncate">${esc(p.name)}</div>
+        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${baht(p.price)}</div>
+        <div class="flex items-center gap-2 mt-2">
+          <button onclick="changeQty('${p.id}',-1)" class="w-6 h-6 rounded-lg bg-white dark:bg-gray-700 border text-xs font-bold flex items-center justify-center">−</button>
+          <span class="text-xs font-bold w-4 text-center">${c.qty}</span>
+          <button onclick="changeQty('${p.id}',1)" class="w-6 h-6 rounded-lg bg-white dark:bg-gray-700 border text-xs font-bold flex items-center justify-center">+</button>
+        </div>
+      </div>
+      <div class="font-extrabold text-sm text-gray-900 dark:text-white">${baht(p.price*c.qty)}</div>
+    </div>`}).join('') : '<p class="text-gray-400 text-center py-12 text-sm"><i class="fa-solid fa-basket-shopping text-3xl mb-2 block"></i>ยังไม่มีสินค้าในตะกร้าของคุณ</p>';
+    
+  const t = calc();
+  $('cart-sum').innerHTML = `
+    <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400"><span>รวมค่าสินค้า</span><span>${baht(t.sub)}</span></div>
+    ${t.disc?`<div class="flex justify-between text-xs text-green-600 font-bold"><span>ส่วนลดคูปอง (${coupon})</span><span>-${baht(t.disc)}</span></div>`:''}
+    <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400"><span>ค่าจัดส่ง</span><span>${t.ship?baht(t.ship):'ส่งฟรี'}</span></div>
+    <div class="flex justify-between font-black text-base text-gray-900 dark:text-white pt-2 border-t border-gray-200 dark:border-gray-800"><span>ยอดชำระสุทธิ</span><span>${baht(t.total)}</span></div>
+    ${t.sub>0&&t.sub<999?`<div class="text-[11px] text-amber-600 font-semibold text-center">ซื้อเพิ่มอีก ${baht(999-t.sub)} เพื่อรับสิทธิ์ส่งฟรี!</div>`:''}`;
+}
+
+function applyCoupon(){
+  const c = $('coupon').value.trim().toUpperCase();
+  if(!COUPONS[c]) return toast('โค้ดส่วนลดไม่ถูกต้อง', 'err');
+  coupon = c; save('yb_coupon', c); renderCart(); toast('ใช้โค้ด '+c+' สำเร็จ!');
+}
+
+function toggleCart(open){
+  $('cart-drawer').classList.toggle('translate-x-full', !open);
+  $('cart-overlay').classList.toggle('hidden', !open);
+}
+
+/* ============ CHECKOUT FLOW ============ */
+let payMethod = 'promptpay';
+function openCheckout(){
+  if(!cart.length) return toast('กรุณาเลือกสินค้าลงตะกร้าก่อน', 'err');
+  toggleCart(false); payMethod = 'promptpay'; drawCheckout(); $('checkout-modal').classList.remove('hidden');
+}
+function closeCheckout(){ $('checkout-modal').classList.add('hidden') }
+
+function fakeQr(seed){
+  let h = 0; for(const ch of seed) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  let cells = ''; const N = 21;
+  for(let y=0; y<N; y++) for(let x=0; x<N; x++){
+    const finder = (x<7&&y<7)||(x>N-8&&y<7)||(x<7&&y>N-8);
+    let on = finder;
+    if(!finder){ h = (h*1103515245+12345)>>>0; on = (h>>>16)%2===0 }
+    if(finder){ const fx=x<7?x:x-(N-7), fy=y<7?y:y-(N-7); on = fx===0||fx===6||fy===0||fy===6||(fx>=2&&fx<=4&&fy>=2&&fy<=4) }
+    if(on) cells += `<rect x="${x}" y="${y}" width="1" height="1"/>`;
+  }
+  return `<svg viewBox="0 0 ${N} ${N}" class="w-40 h-40 bg-white p-2 rounded-xl border" fill="#111827">${cells}</svg>`;
+}
+
 function drawCheckout(){
-  const t=calc();
-  $('checkout-body').innerHTML=`
-  <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-extrabold">ชำระเงิน</h3><button onclick="closeCheckout()" class="text-gray-400 text-xl"><i class="fa-solid fa-xmark"></i></button></div>
+  const t = calc();
+  $('checkout-body').innerHTML = `
+  <div class="flex justify-between items-center mb-5">
+    <h3 class="text-xl font-black text-gray-900 dark:text-white">ยืนยันคำสั่งซื้อ</h3>
+    <button onclick="closeCheckout()" class="text-gray-400 text-lg"><i class="fa-solid fa-xmark"></i></button>
+  </div>
   <div class="space-y-3 text-sm">
-    <input id="c-name" placeholder="ชื่อ-นามสกุล" class="w-full border rounded-lg px-3 py-2">
-    <input id="c-phone" inputmode="tel" placeholder="เบอร์โทร (เช่น 0812345678)" class="w-full border rounded-lg px-3 py-2">
-    <textarea id="c-addr" rows="2" placeholder="ที่อยู่จัดส่ง" class="w-full border rounded-lg px-3 py-2"></textarea>
-    <div class="grid grid-cols-3 gap-2">
-      ${[['promptpay','PromptPay','fa-qrcode'],['card','บัตร','fa-credit-card'],['cod','ปลายทาง','fa-hand-holding-dollar']].map(m=>`<button onclick="payMethod='${m[0]}';drawCheckout()" class="p-3 border rounded-lg text-center ${payMethod===m[0]?'border-yellow-400 bg-yellow-50 font-bold':''}"><i class="fa-solid ${m[2]} block mb-1"></i>${m[1]}</button>`).join('')}
+    <input id="c-name" placeholder="ชื่อ-นามสกุล ผู้รับ" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-2.5 text-sm">
+    <input id="c-phone" inputmode="tel" placeholder="เบอร์โทรศัพท์ติดต่อ" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-2.5 text-sm">
+    <textarea id="c-addr" rows="2" placeholder="ที่อยู่จัดส่งโดยละเอียด..." class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-2.5 text-sm"></textarea>
+    
+    <div class="grid grid-cols-3 gap-2 py-1">
+      ${[['promptpay','พร้อมเพย์','fa-qrcode'],['card','บัตรเครดิต','fa-credit-card'],['cod','เก็บเงินปลายทาง','fa-hand-holding-dollar']].map(m=>`
+        <button onclick="payMethod='${m[0]}';drawCheckout()" class="p-3 border rounded-xl text-center text-xs font-bold transition-all ${payMethod===m[0]?'border-brand-400 bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400':'border-gray-200 dark:border-gray-800'}">
+          <i class="fa-solid ${m[2]} block text-lg mb-1"></i>${m[1]}
+        </button>
+      `).join('')}
     </div>
-    ${payMethod==='promptpay'?`<div class="flex flex-col items-center gap-2 py-2">${fakeQr('YB'+t.total)}<div class="text-xs text-gray-500">QR ตัวอย่างจำลอง — ยอด ${baht(t.total)}</div></div>`:''}
-    ${payMethod==='card'?`<input placeholder="เลขบัตร (จำลอง — ห้ามใส่เลขจริง)" class="w-full border rounded-lg px-3 py-2" disabled><div class="text-xs text-gray-400">โหมดสาธิต: ไม่มีการเก็บข้อมูลบัตร ให้เชื่อม Stripe/Omise จริงเมื่อใช้งาน</div>`:''}
-    <div class="border-t pt-3 flex justify-between font-bold text-base"><span>ยอดสุทธิ</span><span>${baht(t.total)}</span></div>
-    <button onclick="placeOrder()" class="w-full py-3 bg-yellow-400 hover:bg-yellow-500 rounded-lg font-extrabold">ยืนยันออเดอร์</button>
+
+    ${payMethod==='promptpay'?`<div class="flex flex-col items-center gap-2 py-2">${fakeQr('YB'+t.total)}<div class="text-xs text-gray-400">สแกนจ่าย QR PromptPay ยอดสุทธิ ${baht(t.total)}</div></div>`:''}
+    ${payMethod==='card'?`<div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl border text-xs text-gray-400 text-center">โหมดจำลองการชำระเงิน (Stripe/Omise Sandbox)</div>`:''}
+
+    <div class="border-t border-gray-200 dark:border-gray-800 pt-3 flex justify-between font-black text-base text-gray-900 dark:text-white">
+      <span>ยอดชำระทั้งสิ้น</span><span>${baht(t.total)}</span>
+    </div>
+    <button onclick="placeOrder()" class="w-full py-3.5 bg-brand-400 hover:bg-brand-500 text-gray-900 font-extrabold rounded-xl shadow-md transition-all text-base">
+      ชำระเงินและเสร็จสิ้น
+    </button>
   </div>`;
 }
+
 function placeOrder(){
-  const name=$('c-name').value.trim(),phone=$('c-phone').value.trim(),addr=$('c-addr').value.trim();
-  if(!name||!addr)return toast('กรุณากรอกชื่อและที่อยู่','err');
-  if(!/^0\d{8,9}$/.test(phone))return toast('เบอร์โทรไม่ถูกต้อง','err');
-  const t=calc();
-  for(const c of cart){if(c.qty>stockMap[c.id])return toast('สินค้า '+P(c.id).name+' สต็อกไม่พอ','err')}
-  cart.forEach(c=>stockMap[c.id]-=c.qty);save('yb_stock',stockMap);
-  const o={id:'YB-'+(10235+orders.length),name,ch:'web',total:t.total,st:payMethod==='cod'?1:0,t:Date.now(),items:cart.map(c=>[c.id,c.qty]),pay:payMethod};
-  orders.unshift(o);save('yb_orders',orders);
-  syncRemote({action:'createOrder',order:o});
-  cart=[];coupon=null;save('yb_coupon',null);persistCart();funnel.views+=0;
-  $('checkout-body').innerHTML=`<div class="text-center py-8 space-y-3"><div class="text-6xl text-green-500"><i class="fa-solid fa-circle-check"></i></div><h3 class="text-xl font-extrabold">สั่งซื้อสำเร็จ!</h3><p class="text-sm text-gray-500">หมายเลขออเดอร์ <b>${esc(o.id)}</b><br>เราจะแจ้งสถานะผ่าน LINE ให้ทราบ</p><button onclick="closeCheckout();switchTab('orders')" class="px-6 py-2 bg-yellow-400 rounded-lg font-bold">ดูออเดอร์</button></div>`;
+  const name = $('c-name').value.trim(), phone = $('c-phone').value.trim(), addr = $('c-addr').value.trim();
+  if(!name || !addr) return toast('กรุณากรอกชื่อและที่อยู่จัดส่งให้ครบถ้วน', 'err');
+  if(!/^0\d{8,9}$/.test(phone)) return toast('กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง', 'err');
+  
+  const t = calc();
+  for(const c of cart){ if(c.qty > stockMap[c.id]) return toast('สินค้า '+P(c.id).name+' หมดสิทธิ์ซื้อ', 'err') }
+  
+  cart.forEach(c => stockMap[c.id] -= c.qty); save('yb_stock', stockMap);
+  const o = { id: 'YB-'+(10235+orders.length), name, ch: 'web', total: t.total, st: payMethod==='cod'?1:0, t: Date.now(), items: cart.map(c=>[c.id,c.qty]), pay: payMethod };
+  orders.unshift(o); save('yb_orders', orders);
+  
+  cart = []; coupon = null; save('yb_coupon', null); persistCart();
+  $('checkout-body').innerHTML = `
+    <div class="text-center py-8 space-y-4">
+      <div class="text-6xl text-green-500"><i class="fa-solid fa-circle-check"></i></div>
+      <h3 class="text-2xl font-black text-gray-900 dark:text-white">สั่งซื้อสำเร็จแล้ว!</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-400">หมายเลขออเดอร์ของคุณคือ <b class="text-brand-500">${esc(o.id)}</b><br>ระบบจะแจ้งอัปเดตการจัดส่งผ่าน SMS / LINE ให้ทราบ</p>
+      <button onclick="closeCheckout();switchTab('orders')" class="px-6 py-2.5 bg-brand-400 text-gray-900 rounded-xl font-extrabold text-sm shadow">ดูรายการสั่งซื้อ</button>
+    </div>`;
   renderProducts();
-}
-function syncRemote(payload){
-  if(!endpoint)return;
-  fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{});
 }
 
 /* ============ AI ASSISTANT ============ */
 function toggleChat(){
-  const b=$('chat-box');b.classList.toggle('hidden');
-  if(!b.classList.contains('hidden')&&!$('chat-log').children.length){
-    botSay('สวัสดีค่ะ น้องเหลืองเองนะคะ 💛 บอกงบหรือประเภทสินค้าที่สนใจได้เลย เดี๋ยวช่วยเลือกให้!');
-    $('chat-quick').innerHTML=['งบ 1000 บาท','ของมาแรงตอนนี้','มีโค้ดลดไหม','ของเข้าออฟฟิศ'].map(q=>`<button onclick="$('chat-input').value='${q}';askAssistant()" class="text-[11px] border rounded-full px-2 py-1 hover:bg-yellow-50">${q}</button>`).join('');
+  const b = $('chat-box'); b.classList.toggle('hidden');
+  if(!b.classList.contains('hidden') && !$('chat-log').children.length){
+    botSay('สวัสดีค่ะ น้องเหลือง AI ยินดีรับฟังคำถามนะคะ! 💛 สนใจงบเท่าไหร่ หรือสินค้าประเภทไหน ถามได้เลยค่ะ');
+    $('chat-quick').innerHTML = ['งบไม่เกิน 1,500', 'สินค้า AI แนะนำ', 'ขอโค้ดส่วนลด'].map(q => `<button onclick="$('chat-input').value='${q}';askAssistant()" class="text-[11px] border border-gray-200 dark:border-gray-700 rounded-full px-2.5 py-1 bg-gray-50 dark:bg-gray-800 hover:bg-brand-50">${q}</button>`).join('');
   }
 }
-function botSay(html,user=false){
-  const d=document.createElement('div');d.className=user?'text-right':'';
-  d.innerHTML=`<span class="inline-block px-3 py-2 rounded-xl max-w-[90%] text-left ${user?'bg-yellow-400 text-gray-900':'bg-gray-100'}">${html}</span>`;
-  $('chat-log').appendChild(d);$('chat-log').scrollTop=1e9;
-}
-function recCard(p){return `<div class="mt-2 bg-white border rounded-lg p-2 text-gray-800"><b>${esc(p.name)}</b><br>${baht(p.price)} · ⭐${p.rating}<br><button onclick="addToCart('${p.id}')" class="mt-1 text-xs bg-yellow-400 px-2 py-1 rounded font-bold">ใส่ตะกร้า</button></div>`}
-function askAssistant(){
-  const q=$('chat-input').value.trim();if(!q)return;$('chat-input').value='';botSay(esc(q),true);
-  let list=null,reply='';
-  const num=(q.match(/\d[\d,]*/)||[])[0];
-  if(/โค้ด|ส่วนลด|coupon/i.test(q))reply='ตอนนี้มีโค้ด <b>YELLOW10</b> (ลด 10%), <b>AI50</b> (ลด ฿50) และ <b>FREESHIP</b> (ส่งฟรี) ใส่ในตะกร้าได้เลยค่ะ';
-  else if(/มาแรง|ขายดี|แนะนำ|ฮิต/.test(q)){list=[...PRODUCTS].sort((a,b)=>b.sold-a.sold).slice(0,3);reply='3 อันดับขายดีตอนนี้ค่ะ:'}
-  else if(num){const b=parseInt(num.replace(/,/g,''));list=PRODUCTS.filter(p=>p.price<=b).sort((a,b2)=>b2.rating-a.rating).slice(0,3);reply=list.length?`ในงบ ${baht(b)} แนะนำตัวนี้ค่ะ:`:'งบนี้ยังไม่มีสินค้าที่ตรง ลองเพิ่มงบอีกนิดนะคะ'}
-  else{const k=CATS.slice(1).find(c=>q.includes(c))||(/ออฟฟิศ|ทำงาน/.test(q)?'ออฟฟิศ':/บ้าน/.test(q)?'สมาร์ทโฮม':/ai|เอไอ/i.test(q)?'AI Gadget':null);
-    if(k){list=PRODUCTS.filter(p=>p.cat===k).slice(0,3);reply='หมวด '+k+' แนะนำค่ะ:'}else reply='ลองบอกงบ เช่น "งบ 1500" หรือหมวด เช่น "ของใช้ในออฟฟิศ" ได้นะคะ'}
-  botSay(reply+(list?list.map(recCard).join(''):''));
+
+function botSay(html, user=false){
+  const d = document.createElement('div'); d.className = user ? 'text-right' : '';
+  d.innerHTML = `<span class="inline-block px-3.5 py-2.5 rounded-2xl max-w-[85%] text-left text-xs ${user?'bg-brand-400 text-gray-900 font-semibold':'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200'}">${html}</span>`;
+  $('chat-log').appendChild(d); $('chat-log').scrollTop = 1e9;
 }
 
-/* ============ LIVE ============ */
-const FAKE_USERS=['มะลิ','บอส','ฝน','ต้น','แพรว','กานต์','นุ่น','เจ','ไอซ์','เบลล์'];
-const FAKE_MSGS=['ราคาเท่าไหร่คะ','สั่งแล้วค่ะ!','ส่งฟรีไหม','ของแท้ใช่ไหมคะ','อยากได้สีดำ','โค้ดลดอยู่ตรงไหน','น่ารักมากกก','ขอดูใกล้ๆหน่อยค่ะ','รับประกันกี่ปี','ปักตะกร้าเลยค่ะพี่'];
-let liveTimer=null;
+function askAssistant(){
+  const q = $('chat-input').value.trim(); if(!q) return;
+  $('chat-input').value = ''; botSay(esc(q), true);
+  
+  let list = null, reply = '';
+  const num = (q.match(/\d[\d,]*/)||[])[0];
+  if(/โค้ด|ส่วนลด/i.test(q)) reply = 'ใช้โค้ด <b>YELLOW10</b> ลด 10% หรือ <b>AI50</b> ลด ฿50 ในหน้าชำระเงินได้เลยค่ะ!';
+  else if(/แนะนำ|ขายดี/i.test(q)){ list = [...PRODUCTS].sort((a,b)=>b.sold-a.sold).slice(0,2); reply = 'สินค้าขายดีติดอันดับตอนนี้ค่ะ:' }
+  else if(num){ const b = parseInt(num.replace(/,/g,'')); list = PRODUCTS.filter(p=>p.price<=b).slice(0,2); reply = list.length?`ในงบ ${baht(b)} แนะนำตัวนี้ค่ะ:`:'ขออภัยค่ะ ยังไม่มีสินค้าในงบนี้' }
+  else { list = PRODUCTS.slice(0,2); reply = 'ลองดูสินค้ารุ่นนี้ได้นะคะ:' }
+  
+  botSay(reply + (list ? list.map(p => `<div class="mt-2 p-2 bg-white dark:bg-gray-900 rounded-xl border text-xs text-gray-800 dark:text-gray-200"><b>${esc(p.name)}</b> - ${baht(p.price)}<br><button onclick="addToCart('${p.id}')" class="mt-1 text-[10px] bg-brand-400 text-gray-900 px-2 py-0.5 rounded font-bold">ใส่ตะกร้า</button></div>`).join('') : ''));
+}
+
+/* ============ LIVE STREAM ENGINE ============ */
+const FAKE_USERS = ['มะลิ','บอส','ฝน','ต้น','แพรว','กานต์','นุ่น','เจ','ไอซ์'];
+const FAKE_MSGS = ['ราคาเท่าไหร่คะ','ส่งฟรีไหมคะ','กดสั่งซื้อแล้วน้า','ของแท้ประกันกี่ปี','ขอดูสินค้าใกล้ๆ หน่อยค่ะ'];
+let liveTimer = null;
+
 function renderLive(){
   renderPinned();
-  $('live-picker').innerHTML=PRODUCTS.map(p=>`<button onclick="pinProduct('${p.id}')" class="shrink-0 border rounded-lg px-3 py-2 text-xs text-left ${p.id===pinnedId?'border-yellow-400 bg-yellow-50 font-bold':''}"><i class="fa-solid ${p.icon} text-yellow-500"></i> ${esc(p.name)}</button>`).join('');
+  $('live-picker').innerHTML = PRODUCTS.map(p => `<button onclick="pinProduct('${p.id}')" class="shrink-0 border dark:border-gray-800 rounded-xl px-3 py-2 text-xs text-left ${p.id===pinnedId?'border-brand-400 bg-brand-50 dark:bg-brand-900/30 font-bold':''}"><i class="fa-solid ${p.icon} text-brand-500"></i> ${esc(p.name)}</button>`).join('');
   updateLiveStats();
-  if(!liveTimer)liveTimer=setInterval(liveTick,2200);
+  if(!liveTimer) liveTimer = setInterval(liveTick, 2500);
 }
+
 function renderPinned(){
-  const p=P(pinnedId);
-  $('pinned').innerHTML=`<div class="w-12 h-12 rounded-lg bg-yellow-100 flex items-center justify-center"><i class="fa-solid ${p.icon} text-xl text-yellow-600"></i></div>
-   <div class="flex-1 min-w-0"><div class="text-[10px] font-bold text-yellow-600"><i class="fa-solid fa-basket-shopping"></i> ตะกร้าเหลือง #1</div><div class="text-sm font-bold truncate">${esc(p.name)}</div><div class="text-sm"><b>${baht(p.price)}</b> <span class="line-through text-gray-400 text-xs">${baht(p.old)}</span></div></div>
-   <button onclick="addToCart('${p.id}',1,true);liveBuy('${p.id}')" class="px-4 py-2 bg-yellow-400 rounded-lg font-extrabold text-sm">ซื้อเลย</button>`;
+  const p = P(pinnedId);
+  $('pinned').innerHTML = `
+    <div class="w-11 h-11 rounded-xl bg-brand-100 dark:bg-gray-800 flex items-center justify-center shrink-0">
+      <i class="fa-solid ${p.icon} text-xl text-brand-600 dark:text-brand-400"></i>
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="text-[10px] font-black text-brand-600 dark:text-brand-400 uppercase tracking-wider"><i class="fa-solid fa-basket-shopping"></i> ตะกร้าเหลือง #1</div>
+      <div class="text-xs font-bold truncate">${esc(p.name)}</div>
+      <div class="text-xs font-black">${baht(p.price)} <span class="line-through text-gray-400 text-[10px]">${baht(p.old)}</span></div>
+    </div>
+    <button onclick="addToCart('${p.id}',1,true);liveBuy('${p.id}')" class="px-3.5 py-2 bg-brand-400 text-gray-900 rounded-xl font-extrabold text-xs shadow-md">ซื้อเลย</button>`;
 }
-function pinProduct(id){pinnedId=id;renderLive();liveMsg('ระบบ','น้องเหลืองปักตะกร้า "'+P(id).name+'" แล้ว!',true)}
-function liveBuy(id){liveStats.sales+=P(id).price;updateLiveStats()}
-function updateLiveStats(){$('live-sales').textContent=baht(liveStats.sales);$('live-clicks').textContent=liveStats.clicks;$('live-hearts').textContent=liveStats.hearts}
-function liveMsg(u,m,sys=false){
-  const box=$('live-chat'); if(!box)return;
-  const d=document.createElement('div');
-  d.innerHTML=sys?`<div class="bg-yellow-50 text-yellow-800 rounded-lg px-3 py-2 text-xs">${esc(m)}</div>`:`<span class="font-bold text-gray-500">${esc(u)}</span> ${esc(m)}`;
-  box.appendChild(d);while(box.children.length>80)box.removeChild(box.firstChild);box.scrollTop=1e9;
+
+function pinProduct(id){ pinnedId = id; renderLive(); liveMsg('ระบบ', 'ปักตะกร้าสินค้า "'+P(id).name+'" แล้ว!', true) }
+function liveBuy(id){ liveStats.sales += P(id).price; updateLiveStats() }
+function updateLiveStats(){ $('live-sales').textContent = baht(liveStats.sales); $('live-clicks').textContent = liveStats.clicks; $('live-hearts').textContent = liveStats.hearts }
+
+function liveMsg(u, m, sys=false){
+  const box = $('live-chat'); if(!box) return;
+  const d = document.createElement('div');
+  d.innerHTML = sys ? `<div class="bg-brand-50 dark:bg-brand-900/40 text-brand-800 dark:text-brand-300 rounded-xl px-3 py-1.5 text-xs font-bold">${esc(m)}</div>` : `<span class="font-bold text-gray-400 text-xs">${esc(u)}:</span> <span class="text-xs">${esc(m)}</span>`;
+  box.appendChild(d); while(box.children.length > 50) box.removeChild(box.firstChild); box.scrollTop = 1e9;
 }
+
 function liveTick(){
-  if(tab!=='live')return;
-  const v=$('viewers');let n=parseInt(v.textContent.replace(/,/g,''))+Math.round((Math.random()-.4)*40);v.textContent=Math.max(200,n).toLocaleString();
-  liveMsg(FAKE_USERS[Math.floor(Math.random()*FAKE_USERS.length)],FAKE_MSGS[Math.floor(Math.random()*FAKE_MSGS.length)]);
-  if(Math.random()<.25){liveStats.clicks++;updateLiveStats()}
-  if(Math.random()<.12){liveStats.sales+=P(pinnedId).price;updateLiveStats();liveMsg('ระบบ','🛒 มีคนสั่ง '+P(pinnedId).name+' เพิ่ม!',true)}
+  if(tab !== 'live') return;
+  const v = $('viewers'); let n = parseInt(v.textContent.replace(/,/g,'')) + Math.round((Math.random()-.4)*30);
+  v.textContent = Math.max(100, n).toLocaleString();
+  liveMsg(FAKE_USERS[Math.floor(Math.random()*FAKE_USERS.length)], FAKE_MSGS[Math.floor(Math.random()*FAKE_MSGS.length)]);
+  if(Math.random() < 0.2) { liveStats.clicks++; updateLiveStats() }
 }
-function aiLiveReply(q){
-  const p=P(pinnedId);
-  if(/ราคา/.test(q))return `${p.name} ราคา ${baht(p.price)} ค่ะ (ปกติ ${baht(p.old)})`;
-  if(/ส่งฟรี/.test(q))return 'ซื้อครบ ฿999 ส่งฟรีค่ะ';
-  if(/โค้ด/.test(q))return 'ใช้โค้ด YELLOW10 ลดอีก 10% ค่ะ';
-  if(/แท้|ประกัน/.test(q))return 'ของแท้ 100% รับประกัน 1 ปีค่ะ';
-  return 'กดตะกร้าสีเหลืองด้านล่างได้เลยค่ะ 💛';
+
+function sendLiveChat(){
+  const i = $('live-input'), m = i.value.trim(); if(!m) return;
+  i.value = ''; liveMsg('คุณ', m);
+  setTimeout(() => liveMsg('🤖 น้องเหลือง AI', 'สนใจสินค้ากดที่ปักตะกร้าสีเหลืองด้านล่างได้เลยนะคะ! 💛'), 800);
 }
-function sendLiveChat(){const i=$('live-input'),m=i.value.trim();if(!m)return;i.value='';liveMsg('คุณ',m);setTimeout(()=>liveMsg('🤖 น้องเหลือง',aiLiveReply(m)),700)}
+
 function sendHeart(){
-  liveStats.hearts++;updateLiveStats();
-  const h=document.createElement('i');h.className='fa-solid fa-heart heart text-pink-500 text-xl';h.style.right=(14+Math.random()*30)+'px';$('hearts').appendChild(h);setTimeout(()=>h.remove(),1600);
+  liveStats.hearts++; updateLiveStats();
+  const h = document.createElement('i'); h.className = 'fa-solid fa-heart heart text-pink-500 text-2xl';
+  h.style.right = (16 + Math.random()*24) + 'px'; $('hearts').appendChild(h); setTimeout(()=>h.remove(), 1600);
 }
 
-/* ============ DASHBOARD ============ */
-function revenueSeries(){
-  const base=[18200,21400,19800,24600,22900,27300,0];
-  const today=new Date();today.setHours(0,0,0,0);
-  const todayRev=orders.filter(o=>o.t>=today.getTime()&&o.st>0).reduce((s,o)=>s+o.total,0);
-  base[6]=16800+todayRev;return base;
-}
+/* ============ DASHBOARD METRICS ============ */
 function renderDash(){
-  const paid=orders.filter(o=>o.st>0), rev=148200+paid.filter(o=>o.id>'YB-10234').reduce((s,o)=>s+o.total,0);
-  const cnt=342+orders.length-4, aov=Math.round(rev/Math.max(1,cnt));
-  const kp=[['ยอดขายรวม',baht(rev),'+18.4% สัปดาห์นี้','fa-sack-dollar'],['คำสั่งซื้อทั้งหมด',cnt+' รายการ','+9.2%','fa-receipt'],['ค่าเฉลี่ยต่อออเดอร์',baht(aov),'+3.1%','fa-scale-balanced'],['Conversion Rate','4.8%','+0.6 pt','fa-bullseye']];
-  $('kpis').innerHTML=kp.map(k=>`<div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm"><div class="flex justify-between text-gray-500 text-sm"><span>${k[0]}</span><i class="fa-solid ${k[3]} text-yellow-500"></i></div><h4 class="text-2xl font-bold text-gray-900 mt-1">${k[1]}</h4><span class="text-xs text-green-600 font-semibold"><i class="fa-solid fa-arrow-up"></i> ${k[2]}</span></div>`).join('');
-  const days=[];for(let i=6;i>=0;i--){const d=new Date(Date.now()-i*86400000);days.push(d.toLocaleDateString('th-TH',{weekday:'short'}))}
-  const tc=dark?'#d1d5db':'#4b5563';
-  Chart.defaults.color=tc;
-  Object.values(charts).forEach(c=>c.destroy());
-  charts.rev=new Chart($('revChart'),{type:'line',data:{labels:days,datasets:[{label:'รายได้ (฿)',data:revenueSeries(),borderColor:'#eab308',backgroundColor:'rgba(250,204,21,.2)',fill:true,tension:.35}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
-  charts.chan=new Chart($('chanChart'),{type:'doughnut',data:{labels:CHANNELS.filter(c=>sync[c.k]).map(c=>c.n),datasets:[{data:CHANNELS.filter(c=>sync[c.k]).map(c=>c.share||5),backgroundColor:CHANNELS.filter(c=>sync[c.k]).map(c=>c.c),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
-  charts.fun=new Chart($('funnelChart'),{type:'bar',data:{labels:['เข้าชม','ดูสินค้า','ใส่ตะกร้า','ชำระเงิน'],datasets:[{data:[funnel.visitors,funnel.views,1800+cart.length,cnt],backgroundColor:['#fde68a','#fcd34d','#facc15','#eab308']}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
-  $('channels').innerHTML=CHANNELS.map(c=>`<div class="flex items-center justify-between"><div class="flex items-center gap-2"><i class="${c.icon} w-5" style="color:${c.c}"></i><div><div class="font-medium text-gray-800">${c.n}</div><div class="text-xs ${sync[c.k]?'text-green-600':'text-gray-400'}">${sync[c.k]?'● ซิงก์แล้ว':'○ ปิดอยู่'}</div></div></div><button onclick="toggleSync('${c.k}')" class="w-11 h-6 rounded-full relative ${sync[c.k]?'bg-yellow-400':'bg-gray-300'}"><span class="absolute top-0.5 ${sync[c.k]?'left-5':'left-0.5'} w-5 h-5 bg-white rounded-full transition-all"></span></button></div>`).join('');
-  const mx=CREATORS[0].s;
-  $('creators').innerHTML=CREATORS.map((c,i)=>`<div><div class="flex justify-between"><span class="font-medium text-gray-800">${i+1}. ${esc(c.n)}</span><span class="text-gray-500">${baht(c.s)} · ${c.o} ออเดอร์</span></div><div class="h-2 bg-gray-100 rounded mt-1"><div class="h-2 rounded bg-yellow-400" style="width:${c.s/mx*100}%"></div></div></div>`).join('');
-  $('inventory').innerHTML=PRODUCTS.map(p=>{const s=stockMap[p.id],low=s<=10;return `<div class="flex items-center justify-between ${low?'bg-red-50 dark:bg-transparent':''} rounded-lg px-2 py-1.5"><span class="text-gray-800">${esc(p.name)}</span><span class="flex items-center gap-2"><b class="${low?'text-red-500':''}">${s}</b>${low?`<button onclick="restock('${p.id}')" class="text-xs bg-gray-900 text-yellow-300 px-2 py-1 rounded">+50</button>`:''}</span></div>`}).join('');
-  const hot=[...PRODUCTS].sort((a,b)=>b.sold-a.sold)[0], lowp=PRODUCTS.filter(p=>stockMap[p.id]<=10);
-  const ins=[`<div class="p-3 rounded-lg bg-yellow-50"><b>🔥 สินค้าขายดี:</b> ${esc(hot.name)} — แนะนำเพิ่มงบโฆษณา TikTok +20%</div>`];
-  lowp.forEach(p=>ins.push(`<div class="p-3 rounded-lg bg-yellow-50"><b>📈 Dynamic Pricing:</b> ${esc(p.name)} เหลือ ${stockMap[p.id]} ชิ้น แนะนำขึ้นราคา ${baht(p.price)} → ${baht(Math.round(p.price*1.08/10)*10)} (+8%) หรือเติมสต็อกด่วน</div>`));
-  ins.push(`<div class="p-3 rounded-lg bg-yellow-50"><b>⏰ เวลาทองโพสต์:</b> 19:00–21:00 และ 12:00–13:00 มีอัตราคลิกสูงสุด</div>`);
-  $('insights').innerHTML=ins.join('');
-  $('endpoint').value=endpoint;
-}
-function toggleSync(k){sync[k]=!sync[k];save('yb_sync',sync);toast((sync[k]?'เปิด':'ปิด')+'การซิงก์ '+CHANNELS.find(c=>c.k===k).n);renderDash()}
-function restock(id){stockMap[id]+=50;save('yb_stock',stockMap);toast('เติมสต็อก +50');renderDash();renderProducts()}
-function saveEndpoint(){endpoint=$('endpoint').value.trim();save('yb_endpoint',endpoint);toast('บันทึกการเชื่อมต่อแล้ว')}
+  const rev = 148200 + orders.reduce((s,o)=>s+o.total, 0);
+  const kp = [['ยอดขายรวม', baht(rev), '+18.4% สัปดาห์นี้', 'fa-sack-dollar'], ['คำสั่งซื้อ', orders.length+' รายการ', '+9.2%', 'fa-receipt'], ['AOV ถัวเฉลี่ย', baht(rev/Math.max(1,orders.length)), '+3.1%', 'fa-scale-balanced'], ['Conversion Rate', '4.8%', '+0.6 pt', 'fa-bullseye']];
+  
+  $('kpis').innerHTML = kp.map(k => `
+    <div class="bg-white dark:bg-gray-900 p-4.5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+      <div class="flex justify-between text-gray-400 text-xs font-bold"><span>${k[0]}</span><i class="fa-solid ${k[3]} text-brand-500"></i></div>
+      <h4 class="text-xl font-black text-gray-900 dark:text-white mt-1">${k[1]}</h4>
+      <span class="text-[11px] text-green-500 font-bold"><i class="fa-solid fa-arrow-up"></i> ${k[2]}</span>
+    </div>
+  `).join('');
 
-/* ============ STUDIO ============ */
+  const tc = dark ? '#9ca3af' : '#4b5563';
+  Chart.defaults.color = tc;
+  Object.values(charts).forEach(c => c.destroy());
+
+  charts.rev = new Chart($('revChart'), {
+    type: 'line',
+    data: { labels: ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.', 'อา.'], datasets: [{ label: 'รายได้', data: [18200, 21400, 19800, 24600, 22900, 27300, rev/5], borderColor: '#facc15', backgroundColor: 'rgba(250,204,21,0.15)', fill: true, tension: 0.4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  });
+
+  charts.chan = new Chart($('chanChart'), {
+    type: 'doughnut',
+    data: { labels: CHANNELS.map(c=>c.n), datasets: [{ data: [50,20,20,10,5], backgroundColor: ['#facc15','#ee4d2d','#111827','#2563eb','#06c755'], borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+  });
+
+  charts.fun = new Chart($('funnelChart'), {
+    type: 'bar',
+    data: { labels: ['เข้าชม','ดูสินค้า','ใส่ตะกร้า','ชำระเงิน'], datasets: [{ data: [12400, 5200, 1800, orders.length], backgroundColor: ['#fef08a','#fde047','#facc15','#ca8a04'] }] },
+    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  });
+
+  $('channels').innerHTML = CHANNELS.map(c => `
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2"><i class="${c.icon} w-5" style="color:${c.c}"></i><span class="font-bold text-xs">${c.n}</span></div>
+      <button onclick="toggleSync('${c.k}')" class="w-10 h-5 rounded-full relative ${sync[c.k]?'bg-brand-400':'bg-gray-300 dark:bg-gray-700'}"><span class="absolute top-0.5 ${sync[c.k]?'left-5':'left-0.5'} w-4 h-4 bg-white rounded-full transition-all"></span></button>
+    </div>
+  `).join('');
+
+  $('creators').innerHTML = CREATORS.map((c,i) => `
+    <div class="text-xs">
+      <div class="flex justify-between font-bold"><span>${i+1}. ${esc(c.n)}</span><span>${baht(c.s)}</span></div>
+      <div class="h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full mt-1 overflow-hidden"><div class="h-full bg-brand-400" style="width:${(c.s/CREATORS[0].s)*100}%"></div></div>
+    </div>
+  `).join('');
+
+  $('inventory').innerHTML = PRODUCTS.map(p => {
+    const s = stockMap[p.id], low = s <= 10;
+    return `<div class="flex justify-between items-center py-1 text-xs border-b dark:border-gray-800">
+      <span>${esc(p.name)}</span>
+      <span class="${low?'text-red-500 font-bold':''}">${s} ชิ้น ${low?`<button onclick="restock('${p.id}')" class="ml-2 bg-gray-900 text-brand-400 px-2 py-0.5 rounded text-[10px]">+50</button>`:''}</span>
+    </div>`;
+  }).join('');
+
+  $('insights').innerHTML = `<div class="p-3 bg-brand-50 dark:bg-brand-900/30 rounded-xl text-xs space-y-1"><b>💡 AI Recommendation:</b> สินค้า <b>Smart AI Desk Companion</b> มียอดคลิกพุ่งสูงขึ้น 24% แนะนำปรับเพิ่มงบโฆษณาใน TikTok Affiliate</div>`;
+  $('endpoint').value = endpoint;
+}
+
+function toggleSync(k){ sync[k] = !sync[k]; save('yb_sync', sync); renderDash() }
+function restock(id){ stockMap[id] += 50; save('yb_stock', stockMap); renderDash() }
+function saveEndpoint(){ endpoint = $('endpoint').value.trim(); save('yb_endpoint', endpoint); toast('บันทึก Endpoint สำเร็จแล้ว') }
+
+/* ============ AI STUDIO CONTENT GENERATOR ============ */
 function renderStudio(){
-  if(!$('g-prod').options.length)$('g-prod').innerHTML=PRODUCTS.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  if(!$('g-prod').options.length) $('g-prod').innerHTML = PRODUCTS.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
   renderHistory();
 }
-const TONES={
- hype:{th:['หยุดเลื่อนก่อน! ','ของมันต้องมีจริงๆ ','ใครยังไม่มี พลาดแล้วนะ '],en:['Stop scrolling! ','You NEED this ','Don\'t miss out ']},
- friendly:{th:['เพื่อนๆ เคยเป็นไหม ','วันนี้มีของดีมาฝาก ','บอกต่อเลยค่ะ '],en:['Hey friends, ','Sharing a little find ','You\'ll love this ']},
- review:{th:['ใช้มา 2 สัปดาห์ สรุปให้ฟัง ','รีวิวตรงๆ ไม่อ้อม ','ข้อดี-ข้อเสียที่ต้องรู้ '],en:['Two weeks in — honest take: ','Straight review: ','Pros and cons: ']},
- luxury:{th:['ยกระดับทุกวันด้วย ','ความเรียบหรูที่ลงตัว ','สัมผัสประสบการณ์ใหม่ '],en:['Elevate your day with ','Refined design, effortless ','Experience the difference: ']},
- funny:{th:['ตังค์หมดแต่ของมันต้องได้ ','เมียบอกซื้อเลย (ไม่จริง) ','กระเป๋าตังค์: ร้องไห้ / หัวใจ: ปัง '],en:['My wallet is crying but ','Adulting hack: ','Plot twist: ']}
-};
-function localCopy(name,plat,tone,lang,len){
-  const T=TONES[tone][lang],hook=T[Math.floor(Math.random()*T.length)]+name+(lang==='th'?'!':'!');
-  const tags=lang==='th'?['#YellowBasketAI','#ปักตะกร้า','#รีวิวของดี','#ของมันต้องมี','#TikTokShop','#'+name.replace(/\s+/g,'')]:['#YellowBasketAI','#TikTokMadeMeBuyIt','#MustHave','#SmartShopping','#'+name.replace(/\s+/g,'')];
-  const sc=lang==='th'?[
-   ['0-3 วิ',hook],['3-10 วิ',`โชว์ ${name} ใกล้ๆ พร้อมเล่าปัญหาที่ใช้แล้วจบ`],['10-20 วิ','สาธิตการใช้งานจริง 1 ฟีเจอร์เด่น + เปรียบเทียบก่อน/หลัง'],['ปิดท้าย','ราคาโปร + โค้ด YELLOW10 กดตะกร้าสีเหลืองมุมซ้ายล่างได้เลย!']
-  ]:[['0-3s',hook],['3-10s',`Close-up of ${name}, show the problem it solves`],['10-20s','Live demo of the hero feature + before/after'],['CTA','Limited price + code YELLOW10 — tap the yellow basket!']];
-  const cap=lang==='th'?`${hook}\nของแท้ พร้อมส่ง กดสั่งในตะกร้าสีเหลืองได้เลยก่อนของหมด 🧺✨`:`${hook}\nIn stock & shipping fast — tap the yellow basket before it sells out 🧺✨`;
-  return {hook,script:sc,caption:cap,tags,plat,len};
+
+function generateAi(){
+  const name = $('g-custom').value.trim() || P($('g-prod').value).name;
+  const plat = $('g-plat').value, tone = $('g-tone').value, lang = $('g-lang').value;
+  
+  const hook = lang==='th' ? `หยุดดูคลิปนี้ก่อน! ถ้าคุณกำลังมองหา ${name} สรุปสั้นๆ ให้ฟังใน 15 วินาที!` : `Stop scrolling! Here is why you need ${name}!`;
+  const caption = `${hook}\n\nพิกัดกดตะกร้าสีเหลืองมุมซ้ายล่างได้เลย ของแท้ประกันศูนย์ส่งฟรี! 🧺✨\n\n#YellowBasketAI #${plat.replace(/\s+/g,'')} #ปักตะกร้า`;
+  
+  $('g-out').className = "bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm text-sm space-y-4 pop";
+  $('g-out').innerHTML = `
+    <div class="flex justify-between items-center"><span class="font-extrabold text-brand-500">${plat} Content</span><span class="text-xs text-gray-400">AI Generated</span></div>
+    <div><div class="text-xs font-bold text-gray-400 mb-1">🎣 HOOK</div><div class="font-bold text-base text-gray-900 dark:text-white">${esc(hook)}</div></div>
+    <div><div class="text-xs font-bold text-gray-400 mb-1">📝 CAPTION & HASHTAGS</div><div class="whitespace-pre-line text-xs">${esc(caption)}</div></div>
+  `;
+  
+  hist.unshift({t: Date.now(), name, plat, hook}); hist = hist.slice(0, 5); save('yb_hist', hist); renderHistory();
 }
-async function generateAi(){
-  const custom=$('g-custom').value.trim(), p=P($('g-prod').value);
-  const name=custom||(p?p.name:'สินค้า'), plat=$('g-plat').value,tone=$('g-tone').value,lang=$('g-lang').value,len=$('g-len').value;
-  const btn=$('g-btn');btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> AI กำลังเขียน...';
-  let r=null,src='AI จำลองในเครื่อง';
-  if(endpoint){
-    try{
-      const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),7000);
-      const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'generateAiPost',productImageUrl:name,platform:plat,tone,lang,length:len}),signal:ctl.signal});clearTimeout(to);
-      const d=await res.json();
-      if(d.copywriting){r=localCopy(name,plat,tone,lang,len);r.caption=d.copywriting;src='Gemini (Cloud Function)'}
-    }catch(e){}
-  }
-  if(!r)r=localCopy(name,plat,tone,lang,len);
-  await new Promise(x=>setTimeout(x,500));
-  btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-bolt"></i> เจเนอเรตคอนเทนต์';
-  hist.unshift({t:Date.now(),name,plat,hook:r.hook,caption:r.caption});hist=hist.slice(0,10);save('yb_hist',hist);
-  window._last=r;
-  $('g-out').className='bg-white p-5 rounded-xl border border-gray-200 shadow-sm text-sm space-y-4 pop';
-  $('g-out').innerHTML=`<div class="flex justify-between items-center"><div class="font-bold text-gray-900">${esc(plat)} · ${esc(len)}</div><span class="text-[11px] text-gray-400">ที่มา: ${src}</span></div>
-   <div><div class="text-xs font-bold text-yellow-600 mb-1">🎣 HOOK</div><div class="font-bold text-lg text-gray-900">${esc(r.hook)}</div></div>
-   <div><div class="text-xs font-bold text-yellow-600 mb-1">🎬 สคริปต์</div><div class="space-y-1">${r.script.map(s=>`<div class="flex gap-3"><span class="shrink-0 w-16 text-xs font-bold text-gray-500">${esc(s[0])}</span><span>${esc(s[1])}</span></div>`).join('')}</div></div>
-   <div><div class="text-xs font-bold text-yellow-600 mb-1">📝 แคปชัน</div><div class="whitespace-pre-line">${esc(r.caption)}</div></div>
-   <div><div class="text-xs font-bold text-yellow-600 mb-1">#️⃣ แฮชแท็ก</div><div class="flex flex-wrap gap-1">${r.tags.map(t=>`<span class="bg-yellow-50 border border-yellow-200 rounded-full px-2 py-0.5 text-xs">${esc(t)}</span>`).join('')}</div></div>
-   <div class="flex gap-2"><button onclick="copyLast()" class="px-4 py-2 bg-gray-900 text-yellow-300 rounded-lg text-xs font-bold"><i class="fa-regular fa-copy"></i> คัดลอกทั้งหมด</button><button onclick="generateAi()" class="px-4 py-2 border rounded-lg text-xs font-bold"><i class="fa-solid fa-rotate"></i> สร้างใหม่</button></div>`;
-  renderHistory();
-}
-function copyLast(){
-  const r=window._last;if(!r)return;
-  const txt=`${r.hook}\n\n${r.script.map(s=>s[0]+': '+s[1]).join('\n')}\n\n${r.caption}\n\n${r.tags.join(' ')}`;
-  (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast('คัดลอกแล้ว')).catch(()=>{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('คัดลอกแล้ว')}catch(e){toast('คัดลอกไม่สำเร็จ','err')}ta.remove()});
-}
+
 function renderHistory(){
-  $('history').innerHTML=hist.length?hist.map(h=>`<div class="border rounded-lg px-3 py-2"><b class="text-gray-700">${esc(h.name)}</b> · ${esc(h.plat)} · ${new Date(h.t).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})}<div class="truncate">${esc(h.hook)}</div></div>`).join(''):'<p>ยังไม่มีประวัติ</p>';
+  $('history').innerHTML = hist.length ? hist.map(h => `<div class="p-2 border dark:border-gray-800 rounded-xl"><b>${esc(h.name)}</b> (${esc(h.plat)})<div class="text-gray-400 truncate">${esc(h.hook)}</div></div>`).join('') : '<p class="text-gray-400">ยังไม่มีประวัติการสร้าง</p>';
 }
-function clearHistory(){hist=[];save('yb_hist',hist);renderHistory()}
+function clearHistory(){ hist = []; save('yb_hist', hist); renderHistory() }
+
 function buildCalendar(){
-  const types=['รีวิวสินค้า (Reels)','ไลฟ์ปักตะกร้า 20:00','Unboxing + ASMR','เปรียบเทียบก่อน/หลัง','Q&A ตอบคอมเมนต์','โปรโมชั่น Flash Sale','สรุปยอดฮิตประจำสัปดาห์'];
-  const times=['12:00','20:00','19:00','12:30','18:00','21:00','19:30'];
-  const c=$('calendar');c.classList.remove('hidden');
-  c.innerHTML='<h3 class="font-bold text-sm mb-3"><i class="fa-regular fa-calendar-days text-yellow-500"></i> ปฏิทินคอนเทนต์ 7 วัน (AI วางแผน)</h3><div class="grid grid-cols-1 sm:grid-cols-2 gap-2">'+types.map((t,i)=>{
-    const d=new Date(Date.now()+i*86400000),p=PRODUCTS[(i*3)%PRODUCTS.length];
-    return `<div class="border rounded-lg p-3 text-xs"><div class="font-bold text-gray-800">${d.toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'short'})} · ${times[i]}</div><div class="mt-1">${t}</div><div class="text-gray-400 mt-0.5">สินค้า: ${esc(p.name)}</div></div>`}).join('')+'</div>';
+  $('calendar').classList.remove('hidden');
+  $('calendar').innerHTML = `<h3 class="font-bold mb-3 text-sm"><i class="fa-regular fa-calendar-days text-brand-500"></i> ปฏิทินโพสต์คอนเทนต์ 7 วัน</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">${[1,2,3,4,5,6,7].map(d => `<div class="p-3 border dark:border-gray-800 rounded-xl"><b>วันที่ ${d}:</b> รีวิวสินค้าปักตะกร้าเหลือง (${PRODUCTS[d%PRODUCTS.length].name})</div>`).join('')}</div>`;
 }
 
-/* ============ ORDERS ============ */
+/* ============ ORDERS & EXPORT ============ */
 function renderOrders(){
-  $('order-rows').innerHTML=orders.map((o,i)=>`<tr class="border-t border-gray-100">
-   <td class="p-3 font-medium">${esc(o.id)}<div class="text-xs text-gray-400">${new Date(o.t).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'})}</div></td>
-   <td class="p-3">${esc(o.name)}</td><td class="p-3">${esc((CHANNELS.find(c=>c.k===o.ch)||{n:o.ch}).n)}</td>
-   <td class="p-3 text-right font-bold">${baht(o.total)}</td>
-   <td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-bold ${STATUS_CLS[o.st]}">${STATUS[o.st]}</span>
-     <div class="flex gap-1 mt-2">${STATUS.map((_,k)=>`<span class="h-1 flex-1 rounded ${k<=o.st?'bg-yellow-400':'bg-gray-200'}"></span>`).join('')}</div></td>
-   <td class="p-3">${o.st<3?`<button onclick="advance(${i})" class="text-xs bg-gray-900 text-yellow-300 px-3 py-1.5 rounded-lg whitespace-nowrap">ขั้นถัดไป →</button>`:'<i class="fa-solid fa-check text-green-500"></i>'}</td></tr>`).join('');
-  const ab=[...abandonedSeed];
-  if(cart.length){const t=calc();ab.unshift({n:'คุณ (ตะกร้าปัจจุบัน)',items:cart.map(c=>P(c.id).name+' ×'+c.qty).join(', '),v:t.sub})}
-  $('abandoned').innerHTML=ab.map(a=>`<div class="flex flex-wrap items-center justify-between gap-2 border rounded-lg p-3"><div><b class="text-gray-800">${esc(a.n)}</b><div class="text-xs text-gray-500">${esc(a.items)} · ${baht(a.v)}</div></div><button onclick="recover(this,'${esc(a.n)}')" class="text-xs bg-green-500 text-white px-3 py-1.5 rounded-lg"><i class="fa-brands fa-line"></i> ส่งข้อความทวงตะกร้า + คูปอง</button></div>`).join('');
+  $('order-rows').innerHTML = orders.map((o,i) => `
+    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
+      <td class="p-4 font-bold text-gray-900 dark:text-white">${esc(o.id)}</td>
+      <td class="p-4">${esc(o.name)}</td>
+      <td class="p-4"><span class="text-xs font-bold uppercase">${esc(o.ch)}</span></td>
+      <td class="p-4 text-right font-black text-gray-900 dark:text-white">${baht(o.total)}</td>
+      <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-extrabold ${STATUS_CLS[o.st]}">${STATUS[o.st]}</span></td>
+      <td class="p-4 text-center">${o.st<3?`<button onclick="advance(${i})" class="text-xs bg-gray-900 text-brand-400 px-3 py-1.5 rounded-xl font-bold">ขั้นถัดไป →</button>`:'<i class="fa-solid fa-check text-green-500"></i>'}</td>
+    </tr>
+  `).join('');
 }
-function advance(i){orders[i].st=Math.min(3,orders[i].st+1);save('yb_orders',orders);toast('อัปเดต '+orders[i].id+' → '+STATUS[orders[i].st]);renderOrders()}
-function recover(btn,n){btn.disabled=true;btn.textContent='ส่งแล้ว ✓ (จำลอง)';btn.classList.replace('bg-green-500','bg-gray-400');toast('ส่งข้อความถึง '+n+' แล้ว (โหมดสาธิต)')}
+
+function advance(i){ orders[i].st = Math.min(3, orders[i].st+1); save('yb_orders', orders); renderOrders() }
+
 function exportCsv(){
-  const rows=[['order_id','customer','channel','total','status','created']].concat(orders.map(o=>[o.id,o.name,o.ch,o.total,STATUS[o.st],new Date(o.t).toISOString()]));
-  const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='yellowbasket-orders.csv';a.click();
+  const rows = [['order_id','customer','channel','total','status']].concat(orders.map(o => [o.id, o.name, o.ch, o.total, STATUS[o.st]]));
+  const csv = '\ufeff' + rows.map(r => r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
+  a.download = 'yellowbasket-orders.csv'; a.click();
 }
 
-/* ============ SOCIAL PROOF ============ */
-function socialProof(){
-  const names=['คุณมะลิ','คุณบอส','คุณฝน','คุณต้น','คุณแพรว'],p=PRODUCTS[Math.floor(Math.random()*PRODUCTS.length)],el=$('proof');
-  el.innerHTML=`<i class="fa-solid fa-bag-shopping text-yellow-500"></i> <b>${names[Math.floor(Math.random()*names.length)]}</b> เพิ่งสั่ง <b>${esc(p.name)}</b><div class="text-gray-400">เมื่อ ${1+Math.floor(Math.random()*5)} นาทีที่แล้ว</div>`;
-  el.classList.remove('hidden');setTimeout(()=>el.classList.add('hidden'),4000);
-}
-
-/* ============ INIT ============ */
-window.addEventListener('DOMContentLoaded',()=>{
-  applyLang();applyDark();renderChips();renderProducts();renderCart();startCountdown();switchTab('store');
-  setInterval(()=>{if(tab==='store')socialProof()},14000);
+/* ============ INITIALIZATION ============ */
+window.addEventListener('DOMContentLoaded', () => {
+  applyLang(); applyDark(); renderChips(); renderProducts(); renderCart(); startCountdown(); switchTab('store');
 });
 </script>
 </body>

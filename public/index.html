@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#facc15">
 <meta name="description" content="YellowBasket AI - ระบบปักตะกร้าและขายสินค้าอัจฉริยะผ่าน Omnichannel Commerce Super Engine">
-<title>YellowBasket AI - ระบบ AI ปักตะกร้าอัจฉริยะขั้นสูง v3.0</title>
+<title>YellowBasket AI - ระบบ AI ปักตะกร้าอัจฉริยะขั้นสูง v4.0</title>
 
 <!-- TailWind CSS & Icons & Fonts -->
 <script src="https://cdn.tailwindcss.com"></script>
@@ -26,17 +26,20 @@
         },
         keyframes: {
           shimmer: { '100%': { transform: 'translateX(100%)' } },
-          floatUp: { '0%': { transform: 'translateY(0)', opacity: '1' }, '100%': { transform: 'translateY(-160px)', opacity: '0' } }
+          floatUp: { '0%': { transform: 'translateY(0)', opacity: '1' }, '100%': { transform: 'translateY(-160px)', opacity: '0' } },
+          pulseGlow: { '0%, 100%': { opacity: '1', transform: 'scale(1)' }, '50%': { opacity: '0.6', transform: 'scale(1.05)' } }
         },
         animation: {
           shimmer: 'shimmer 1.5s infinite',
-          floatUp: 'floatUp 1.6s ease-out forwards'
+          floatUp: 'floatUp 1.6s ease-out forwards',
+          pulseGlow: 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
         }
       }
     }
   }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
@@ -52,8 +55,8 @@
   .pop { animation: pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
   @keyframes pop { 0% { transform: scale(0.94); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
   .heart { position: absolute; bottom: 10px; right: 14px; animation: floatUp 1.6s ease-out forwards; pointer-events: none; }
-  #chat-log::-webkit-scrollbar, #live-chat::-webkit-scrollbar { width: 4px; }
-  #chat-log::-webkit-scrollbar-thumb, #live-chat::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 4px; }
+  #chat-log::-webkit-scrollbar, #live-chat::-webkit-scrollbar, #feed-stream::-webkit-scrollbar { width: 4px; }
+  #chat-log::-webkit-scrollbar-thumb, #live-chat::-webkit-scrollbar-thumb, #feed-stream::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.5); border-radius: 4px; }
 </style>
 </head>
 <body class="bg-gray-50 text-gray-800 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300 min-h-screen flex flex-col">
@@ -66,7 +69,7 @@
     </div>
     <div>
       <span class="text-xl font-black text-gray-900 dark:text-white tracking-tight">YellowBasket <span class="text-brand-500">AI</span></span>
-      <span class="block text-[10px] text-gray-500 dark:text-gray-400 font-semibold tracking-wider uppercase">Omnichannel Super Engine v3.0</span>
+      <span class="block text-[10px] text-gray-500 dark:text-gray-400 font-semibold tracking-wider uppercase">Omnichannel Super Engine v4.0</span>
     </div>
   </div>
   
@@ -76,6 +79,7 @@
     <button data-tab="dash" class="tabbtn px-3.5 py-2 rounded-lg whitespace-nowrap transition-all"><i class="fa-solid fa-chart-line mr-1.5 text-blue-500"></i><span data-i18n="tab_dash">แดชบอร์ด</span></button>
     <button data-tab="studio" class="tabbtn px-3.5 py-2 rounded-lg whitespace-nowrap transition-all"><i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-purple-500"></i><span data-i18n="tab_studio">AI Studio</span></button>
     <button data-tab="orders" class="tabbtn px-3.5 py-2 rounded-lg whitespace-nowrap transition-all"><i class="fa-solid fa-box mr-1.5 text-amber-600"></i><span data-i18n="tab_orders">ออเดอร์</span></button>
+    <button data-tab="settings" class="tabbtn px-3.5 py-2 rounded-lg whitespace-nowrap transition-all"><i class="fa-solid fa-gear mr-1.5 text-emerald-500"></i><span data-i18n="tab_settings">ตั้งค่าระบบ</span></button>
   </div>
 
   <div class="flex items-center gap-2">
@@ -200,53 +204,83 @@
   </div>
 </section>
 
-<!-- ================= DASHBOARD VIEW ================= -->
+<!-- ================= DYNAMIC DASHBOARD VIEW ================= -->
 <section id="view-dash" class="view space-y-6">
+  <!-- Top Dynamic Status Banner -->
+  <div class="bg-gradient-to-r from-gray-900 via-gray-800 to-amber-950 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4 border border-brand-500/20">
+    <div class="flex items-center gap-4 z-10">
+      <div class="w-12 h-12 rounded-2xl bg-brand-400/20 border border-brand-400/40 text-brand-400 flex items-center justify-center text-2xl animate-pulseGlow">
+        <i class="fa-solid fa-bolt"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h2 class="text-xl font-black tracking-tight">Real-Time Omnichannel Engine</h2>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-green-500/20 text-green-400 border border-green-500/40">
+            <span class="w-1.5 h-1.5 rounded-full bg-green-400 mr-1 pulse-dot"></span> LIVE SYNC
+          </span>
+        </div>
+        <p class="text-xs text-gray-300 mt-0.5">ระบบเชื่อมต่อ AI Automation และแพลตฟอร์มพันธมิตรกำลังทำงานเรียลไทม์</p>
+      </div>
+    </div>
+    <div class="flex gap-2 z-10">
+      <button onclick="testConnections()" class="px-4 py-2 bg-brand-400 text-gray-900 rounded-xl text-xs font-extrabold shadow hover:bg-brand-500 transition-all flex items-center gap-1.5">
+        <i class="fa-solid fa-vial"></i> ทดสอบ API Health
+      </button>
+      <button onclick="switchTab('settings')" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white border border-gray-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+        <i class="fa-solid fa-gear"></i> ตั้งค่าการเชื่อมต่อ
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Cards with Animated Gradients -->
   <div id="kpis" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
   
+  <!-- Main Analytics Charts -->
   <div class="grid lg:grid-cols-3 gap-6">
-    <div class="lg:col-span-2 bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-      <h3 class="font-bold mb-4 text-base flex items-center gap-2"><i class="fa-solid fa-chart-area text-brand-500"></i> แนวโน้มรายได้ 7 วันล่าสุด</h3>
+    <div class="lg:col-span-2 bg-white dark:bg-gray-900 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm relative">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-chart-area text-brand-500"></i> แนวโน้มรายได้ & ยอดปักตะกร้า (7 วันล่าสุด)</h3>
+        <span class="text-xs text-green-500 font-bold bg-green-500/10 px-2.5 py-1 rounded-full"><i class="fa-solid fa-arrow-trend-up mr-1"></i>+24.5% vs วีคก่อน</span>
+      </div>
       <div class="h-64"><canvas id="revChart"></canvas></div>
     </div>
-    <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+    <div class="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
       <h3 class="font-bold mb-4 text-base flex items-center gap-2"><i class="fa-solid fa-pie-chart text-brand-500"></i> สัดส่วนช่องทาง Omnichannel</h3>
       <div class="h-64"><canvas id="chanChart"></canvas></div>
     </div>
   </div>
 
+  <!-- Interactive Middle Grid: Funnel + Live Stream Feed + Creators -->
   <div class="grid lg:grid-cols-3 gap-6">
-    <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+    <div class="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
       <h3 class="font-bold mb-4 text-base flex items-center gap-2"><i class="fa-solid fa-filter text-brand-500"></i> Conversion Funnel</h3>
       <div class="h-56"><canvas id="funnelChart"></canvas></div>
     </div>
-    <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-      <h3 class="font-bold mb-4 text-base flex items-center gap-2"><i class="fa-solid fa-plug text-brand-500"></i> Omnichannel Sync</h3>
-      <div id="channels" class="space-y-3.5 text-sm"></div>
+    
+    <!-- Live Activity Stream Feed (เพิ่มความสดใส มีชีวิตชีวา) -->
+    <div class="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col h-[290px]">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-rss text-red-500 animate-pulse"></i> Live Activity Feed Stream</h3>
+        <span class="text-[10px] bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full font-bold">Realtime</span>
+      </div>
+      <div id="feed-stream" class="flex-1 overflow-y-auto space-y-2.5 pr-1"></div>
     </div>
-    <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+
+    <div class="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
       <h3 class="font-bold mb-4 text-base flex items-center gap-2"><i class="fa-solid fa-trophy text-brand-500"></i> Creator / Affiliate Leaders</h3>
       <div id="creators" class="space-y-3.5 text-sm"></div>
     </div>
   </div>
 
+  <!-- Bottom Grid: Inventory & AI Insights -->
   <div class="grid lg:grid-cols-2 gap-6">
-    <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+    <div class="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
       <h3 class="font-bold mb-4 text-base flex items-center gap-2"><i class="fa-solid fa-boxes-stacked text-brand-500"></i> คลังสินค้า & Alert สต็อก</h3>
       <div id="inventory" class="space-y-2 text-sm max-h-60 overflow-y-auto pr-1"></div>
     </div>
-    <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+    <div class="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm">
       <h3 class="font-bold mb-4 text-base flex items-center gap-2"><i class="fa-solid fa-lightbulb text-brand-500"></i> AI Insights & Dynamic Pricing</h3>
       <div id="insights" class="space-y-3 text-sm"></div>
-    </div>
-  </div>
-
-  <div class="bg-white dark:bg-gray-900 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-    <h3 class="font-bold mb-2 flex items-center gap-2"><i class="fa-solid fa-gear text-brand-500"></i> ตั้งค่าเชื่อมต่อ Vertex AI / Gemini Endpoint</h3>
-    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">วาง Cloud Function URL สำหรับเชื่อมต่อ Gemini Backend — หากว่างไว้ ระบบจะรัน Local Smart AI อัตโนมัติ</p>
-    <div class="flex gap-2">
-      <input id="endpoint" class="flex-1 border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" placeholder="https://us-central1-YOUR_PROJECT.cloudfunctions.net/yellowBasketAPI">
-      <button onclick="saveEndpoint()" class="px-5 py-2.5 bg-brand-400 hover:bg-brand-500 text-gray-900 rounded-xl font-extrabold text-sm transition-all shadow-sm">บันทึก</button>
     </div>
   </div>
 </section>
@@ -297,8 +331,13 @@
         </div>
       </div>
 
+      <div><label class="text-xs font-bold text-gray-500 dark:text-gray-400">ประเภทงาน Google AI</label>
+        <select id="g-mode" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-sm mt-1">
+          <option value="script">📝 สคริปต์ + แคปชัน (Gemini)</option><option value="image">🖼 ภาพโฆษณา (Imagen / Gemini Image)</option>
+          <option value="video">🎬 วิดีโอโฆษณา (Veo)</option><option value="speech">🎙 เสียงพากย์ (Gemini TTS)</option><option value="research">🔎 วิจัยตลาด (Google Search)</option>
+        </select></div>
       <button onclick="generateAi()" id="g-btn" class="w-full py-3.5 bg-brand-400 hover:bg-brand-500 text-gray-900 font-extrabold rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-2">
-        <i class="fa-solid fa-bolt"></i> สร้างสคริปต์ & คอนเทนต์ AI
+        <i class="fa-solid fa-bolt"></i> สร้างด้วย Google AI
       </button>
 
       <button onclick="buildCalendar()" class="w-full py-2.5 border border-brand-400 text-brand-600 dark:text-brand-400 font-bold rounded-xl text-sm hover:bg-brand-50 dark:hover:bg-gray-800 transition-colors">
@@ -354,6 +393,307 @@
   </div>
 </section>
 
+<!-- ================= SETTINGS VIEW (ใหม่ล่าสุด) ================= -->
+<section id="view-settings" class="view space-y-6">
+  <div class="flex flex-wrap justify-between items-center gap-3">
+    <div>
+      <h2 class="text-2xl font-extrabold tracking-tight flex items-center gap-2.5">
+        <i class="fa-solid fa-sliders text-emerald-500"></i> ศูนย์รวมการตั้งค่าระบบ & API Integrations
+      </h2>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">กำหนดค่า API Keys, Cloud Proxy, Payment Gateway, Shipping Integrations และ Webhooks ครบจบในที่เดียว</p>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="resetSettings()" class="px-4 py-2 border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-xl text-xs font-bold transition-all">
+        <i class="fa-solid fa-rotate-left mr-1"></i> รีเซ็ตเป็นค่าเริ่มต้น
+      </button>
+      <button onclick="saveAllSettings()" class="px-5 py-2.5 bg-brand-400 hover:bg-brand-500 text-gray-900 rounded-xl text-xs font-extrabold shadow-md transition-all active:scale-95 flex items-center gap-1.5">
+        <i class="fa-solid fa-floppy-disk"></i> บันทึกการตั้งค่าทั้งหมด
+      </button>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Navigation Tabs inside Settings -->
+    <div class="space-y-2 lg:col-span-1">
+      <div class="bg-white dark:bg-gray-900 p-3 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-1">
+        <button onclick="setTabGroup('ai')" id="set-tab-ai" class="set-tab-btn w-full text-left px-4 py-3 rounded-2xl text-xs font-bold transition-all flex items-center justify-between bg-brand-50 dark:bg-gray-800 text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-gray-700">
+          <span class="flex items-center gap-2.5"><i class="fa-solid fa-brain text-brand-500 text-sm"></i> AI Engine Integrations</span>
+          <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        </button>
+        <button onclick="setTabGroup('gai')" id="set-tab-gai" class="set-tab-btn w-full text-left px-4 py-3 rounded-2xl text-xs font-bold transition-all flex items-center justify-between text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">
+          <span class="flex items-center gap-2.5"><i class="fa-brands fa-google text-red-500 text-sm"></i> Google AI Hub</span>
+          <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        </button>
+        <button onclick="setTabGroup('omni')" id="set-tab-omni" class="set-tab-btn w-full text-left px-4 py-3 rounded-2xl text-xs font-bold transition-all flex items-center justify-between text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">
+          <span class="flex items-center gap-2.5"><i class="fa-solid fa-network-wired text-blue-500 text-sm"></i> Social Commerce APIs</span>
+          <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        </button>
+        <button onclick="setTabGroup('pay')" id="set-tab-pay" class="set-tab-btn w-full text-left px-4 py-3 rounded-2xl text-xs font-bold transition-all flex items-center justify-between text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">
+          <span class="flex items-center gap-2.5"><i class="fa-solid fa-credit-card text-emerald-500 text-sm"></i> Payment Gateways</span>
+          <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        </button>
+        <button onclick="setTabGroup('ship')" id="set-tab-ship" class="set-tab-btn w-full text-left px-4 py-3 rounded-2xl text-xs font-bold transition-all flex items-center justify-between text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">
+          <span class="flex items-center gap-2.5"><i class="fa-solid fa-truck-fast text-amber-500 text-sm"></i> Logistics & Shipping</span>
+          <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        </button>
+        <button onclick="setTabGroup('sys')" id="set-tab-sys" class="set-tab-btn w-full text-left px-4 py-3 rounded-2xl text-xs font-bold transition-all flex items-center justify-between text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800">
+          <span class="flex items-center gap-2.5"><i class="fa-solid fa-sliders text-purple-500 text-sm"></i> System & Webhooks</span>
+          <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        </button>
+      </div>
+
+      <!-- Quick Test Box -->
+      <div class="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-5 rounded-3xl shadow-lg border border-gray-700 space-y-3">
+        <h4 class="text-xs font-black text-brand-400 uppercase tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-vial"></i> API Status Monitor
+        </h4>
+        <div class="text-xs space-y-2" id="api-status-list">
+          <div class="flex justify-between items-center py-1 border-b border-gray-700">
+            <span>Google Gemini AI</span>
+            <span id="st-gemini" class="px-2 py-0.5 rounded text-[10px] bg-yellow-500/20 text-yellow-400 font-bold">ยังไม่ตรวจสอบ</span>
+          </div>
+          <div class="flex justify-between items-center py-1 border-b border-gray-700">
+            <span>Vertex Cloud Proxy</span>
+            <span id="st-proxy" class="px-2 py-0.5 rounded text-[10px] bg-yellow-500/20 text-yellow-400 font-bold">Local Fallback</span>
+          </div>
+          <div class="flex justify-between items-center py-1 border-b border-gray-700">
+            <span>TikTok Shop API</span>
+            <span id="st-tiktok" class="px-2 py-0.5 rounded text-[10px] bg-green-500/20 text-green-400 font-bold">Connected</span>
+          </div>
+          <div class="flex justify-between items-center py-1 border-b border-gray-700">
+            <span>Webhook / Event Bus</span>
+            <span id="st-hook" class="px-2 py-0.5 rounded text-[10px] bg-yellow-500/20 text-yellow-400 font-bold">ยังไม่ตั้งค่า</span>
+          </div>
+          <div class="flex justify-between items-center py-1">
+            <span>Payment Gateway</span>
+            <span id="st-pay" class="px-2 py-0.5 rounded text-[10px] bg-green-500/20 text-green-400 font-bold">PromptPay Active</span>
+          </div>
+        </div>
+        <button onclick="testConnections()" class="w-full py-2 bg-brand-400 text-gray-900 font-extrabold rounded-xl text-xs hover:bg-brand-500 transition-colors">
+          ทดสอบความพร้อมทุกระบบ
+        </button>
+      </div>
+    </div>
+
+    <!-- Form Groups -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- 1. AI Engine Integrations -->
+      <div id="set-group-ai" class="set-group bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-5 pop">
+        <div class="border-b border-gray-200 dark:border-gray-800 pb-3">
+          <h3 class="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+            <i class="fa-solid fa-brain text-brand-500"></i> AI Engine Integrations
+          </h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">กำหนดค่า API Keys สำหรับ Google Gemini, OpenAI และ Cloud AI Endpoints</p>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5 flex justify-between">
+              <span>Google Gemini API Key</span>
+              <a href="https://aistudio.google.com/" target="_blank" class="text-brand-600 dark:text-brand-400 hover:underline font-normal text-[11px]">ขอรับ API Key ฟรี →</a>
+            </label>
+            <div class="relative">
+              <input id="set-gemini-key" type="password" placeholder="AIzaSy..." class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl pl-4 pr-10 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-brand-400">
+              <button onclick="toggleVisibility('set-gemini-key')" class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xs">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Gemini Text Model (พิมพ์ชื่อเองได้ / alias -latest)</label>
+              <input id="set-gemini-model" list="dl-text" placeholder="gemini-flash-latest" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Vertex AI / Cloud Proxy Endpoint</label>
+              <input id="set-vertex-url" placeholder="https://us-central1-PROJECT.cloudfunctions.net/api" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">OpenAI API Key (สำรอง)</label>
+              <input id="set-openai-key" type="password" placeholder="sk-proj-..." class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Anthropic Claude Key (สำรอง)</label>
+              <input id="set-anthropic-key" type="password" placeholder="sk-ant-..." class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Google AI Hub -->
+      <div id="set-group-gai" class="set-group hidden bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-5 pop">
+        <div class="border-b border-gray-200 dark:border-gray-800 pb-3 flex justify-between items-start gap-3">
+          <div><h3 class="text-base font-extrabold flex items-center gap-2"><i class="fa-brands fa-google text-red-500"></i> Google AI Hub</h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Gemini · Imagen · Veo · TTS · Embeddings · Search Grounding · URL Context · Code Execution · Function Calling</p></div>
+          <button onclick="refreshModels()" class="shrink-0 px-3 py-2 bg-brand-400 text-gray-900 rounded-xl text-xs font-extrabold"><i class="fa-solid fa-rotate"></i> ดึงโมเดลล่าสุด</button>
+        </div>
+        <div class="text-[11px] text-gray-400" id="x-model-count"></div>
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Image Model (Gemini Image / Imagen)</label><input id="x-image" list="dl-image" placeholder="gemini-2.5-flash-image" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs"></div>
+          <div><label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Video Model (Veo)</label><input id="x-video" list="dl-video" placeholder="veo-3.0-generate-001" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs"></div>
+          <div><label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Speech Model (TTS)</label><input id="x-tts" list="dl-tts" placeholder="gemini-2.5-flash-preview-tts" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs"></div>
+          <div><label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Embedding Model</label><input id="x-embed" list="dl-embed" placeholder="gemini-embedding-001" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs"></div>
+          <div><label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">เสียงพากย์</label><select id="x-voice" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs"></select></div>
+          <div><label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Thinking Budget (ว่าง = อัตโนมัติ, 0 = ปิด)</label><input id="x-think"  placeholder="เช่น 1024" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs"></div>
+        </div>
+        <label class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-800"><div><div class="text-xs font-bold">Google Search Grounding</div><div class="text-[11px] text-gray-400">ให้สคริปต์/แชทอ้างอิงข้อมูลล่าสุดจากเว็บ (อาจมีค่าใช้จ่ายเพิ่ม)</div></div><input id="x-ground" type="checkbox" class="w-5 h-5 accent-brand-400"></label>
+        <label class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-800"><div><div class="text-xs font-bold">URL Context</div><div class="text-[11px] text-gray-400">ให้ Gemini อ่านลิงก์สินค้า/คู่แข่งที่ระบุในพรอมต์</div></div><input id="x-url" type="checkbox" class="w-5 h-5 accent-brand-400"></label>
+        <label class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-800"><div><div class="text-xs font-bold">Code Execution</div><div class="text-[11px] text-gray-400">ให้ Gemini รันโค้ดคำนวณตัวเลขใน AI Insights</div></div><input id="x-code" type="checkbox" class="w-5 h-5 accent-brand-400"></label>
+        <datalist id="dl-text"></datalist><datalist id="dl-image"></datalist><datalist id="dl-video"></datalist><datalist id="dl-tts"></datalist><datalist id="dl-embed"></datalist>
+        <p class="text-[11px] text-amber-600 dark:text-amber-400 leading-relaxed"><i class="fa-solid fa-shield-halved"></i> คีย์ที่ใส่ในเบราว์เซอร์เห็นได้จาก DevTools — ใช้งานจริงกับลูกค้าให้ตั้ง Proxy (Cloud Run/Functions) เก็บคีย์ฝั่งเซิร์ฟเวอร์ แล้วใส่ URL ในช่อง Cloud Proxy Endpoint</p>
+      </div>
+
+      <!-- 2. Social Commerce Integrations -->
+      <div id="set-group-omni" class="set-group hidden bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-5 pop">
+        <div class="border-b border-gray-200 dark:border-gray-800 pb-3">
+          <h3 class="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+            <i class="fa-solid fa-network-wired text-blue-500"></i> Social Commerce API Connections
+          </h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">เชื่อมต่อคลังสินค้าและออเดอร์กับแพลตฟอร์มพาร์ทเนอร์</p>
+        </div>
+
+        <div class="space-y-4">
+          <div class="p-3.5 bg-yellow-50/50 dark:bg-gray-800/40 rounded-2xl border border-yellow-200/60 dark:border-gray-700 space-y-2">
+            <div class="font-bold text-xs text-yellow-800 dark:text-yellow-400 flex items-center gap-2">
+              <i class="fa-brands fa-tiktok"></i> TikTok Shop Open Platform
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <input id="set-tiktok-app" placeholder="App Key" class="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl px-3 py-2 text-xs">
+              <input id="set-tiktok-secret" type="password" placeholder="App Secret" class="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl px-3 py-2 text-xs">
+            </div>
+          </div>
+
+          <div class="p-3.5 bg-orange-50/50 dark:bg-gray-800/40 rounded-2xl border border-orange-200/60 dark:border-gray-700 space-y-2">
+            <div class="font-bold text-xs text-orange-800 dark:text-orange-400 flex items-center gap-2">
+              <i class="fa-solid fa-bag-shopping"></i> Shopee Open Partner API v2
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <input id="set-shopee-partner" placeholder="Partner ID" class="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl px-3 py-2 text-xs">
+              <input id="set-shopee-key" type="password" placeholder="Partner Key" class="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl px-3 py-2 text-xs">
+            </div>
+          </div>
+
+          <div class="p-3.5 bg-emerald-50/50 dark:bg-gray-800/40 rounded-2xl border border-emerald-200/60 dark:border-gray-700 space-y-2">
+            <div class="font-bold text-xs text-emerald-800 dark:text-emerald-400 flex items-center gap-2">
+              <i class="fa-brands fa-line"></i> LINE Messaging & OA API
+            </div>
+            <input id="set-line-token" type="password" placeholder="Channel Access Token (Long-Lived)" class="w-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-xl px-3 py-2 text-xs">
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Payment Gateways -->
+      <div id="set-group-pay" class="set-group hidden bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-5 pop">
+        <div class="border-b border-gray-200 dark:border-gray-800 pb-3">
+          <h3 class="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+            <i class="fa-solid fa-credit-card text-emerald-500"></i> Payment Gateway Integrations
+          </h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">ตั้งค่าการรับชำระเงินผ่าน PromptPay, บัตรเครดิต และช่องทางอื่นๆ</p>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">หมายเลข PromptPay (เบอร์โทรศัพท์ หรือ เลขประจำตัวผู้เสียภาษี)</label>
+            <input id="set-promptpay-id" placeholder="0812345678" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-2.5 text-xs">
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Stripe Publishable Key</label>
+              <input id="set-stripe-pub" placeholder="pk_live_..." class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Stripe Secret Key</label>
+              <input id="set-stripe-sec" type="password" placeholder="sk_live_..." class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Omise Public Key</label>
+              <input id="set-omise-pub" placeholder="pkey_..." class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Omise Secret Key</label>
+              <input id="set-omise-sec" type="password" placeholder="skey_..." class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Logistics & Shipping -->
+      <div id="set-group-ship" class="set-group hidden bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-5 pop">
+        <div class="border-b border-gray-200 dark:border-gray-800 pb-3">
+          <h3 class="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+            <i class="fa-solid fa-truck-fast text-amber-500"></i> Logistics & Shipping APIs
+          </h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">เชื่อมต่อระบบออกเลขพัสดุและเรียกขนส่งรับสินค้าอัตโนมัติ</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Flash Express API Key</label>
+            <input id="set-flash-key" placeholder="FLE-..." class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Kerry Express (KEX) Key</label>
+            <input id="set-kerry-key" placeholder="KEX-..." class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">J&T Express API Token</label>
+            <input id="set-jnt-key" placeholder="JNT-..." class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">ไปรษณีย์ไทย (Thailand Post Token)</label>
+            <input id="set-thpost-token" placeholder="THP-..." class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs">
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. System & Webhook Settings -->
+      <div id="set-group-sys" class="set-group hidden bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-5 pop">
+        <div class="border-b border-gray-200 dark:border-gray-800 pb-3">
+          <h3 class="text-base font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-purple-500"></i> System & Webhook Settings
+          </h3>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">การตั้งค่าเซิร์ฟเวอร์แจ้งเตือน และอัลกอริทึมสต็อกอัตโนมัติ</p>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Webhook Endpoint URL (รับแจ้งเตือนออเดอร์ใหม่)</label>
+            <input id="set-webhook-url" type="url" placeholder="https://yourdomain.com/api/webhook" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-2.5 text-xs">
+            <input id="set-webhook-secret" type="password" placeholder="Webhook Signing Secret (HMAC-SHA256 → header X-YB-Signature)" class="mt-2 w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-2.5 text-xs">
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">รอบ Sync สต็อกอัตโนมัติ (นาที)</label>
+              <input id="set-sync-interval" type="number" min="1" max="60" value="5" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Low Stock Alert Threshold (ชิ้น)</label>
+              <input id="set-low-stock" type="number" min="1" max="100" value="10" class="w-full border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2 text-xs">
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-3.5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-800">
+            <div>
+              <div class="text-xs font-bold text-gray-900 dark:text-white">Dynamic Pricing AI Engine</div>
+              <div class="text-[11px] text-gray-400">อนุญาตให้ AI ปรับลด/เพิ่มราคาโปรโมชันตาม Demand อัตโนมัติ</div>
+            </div>
+            <input id="set-dynamic-price" type="checkbox" checked class="w-5 h-5 accent-brand-400 cursor-pointer">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 </main>
 
 <!-- CART DRAWER -->
@@ -405,7 +745,6 @@
 
 <!-- TOAST & SOCIAL PROOF -->
 <div id="toasts" class="fixed top-20 right-4 z-[60] space-y-2 pointer-events-none"></div>
-<div id="proof" class="hidden fixed bottom-6 left-6 z-30 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl px-4 py-3 text-xs max-w-xs pop"></div>
 
 <script>
 /* ============ DATA STATE ============ */
@@ -449,10 +788,27 @@ let stockMap = load('yb_stock', null) || Object.fromEntries(PRODUCTS.map(p=>[p.i
 let hist = load('yb_hist', []);
 let sync = load('yb_sync', {tiktok:true,shopee:true,web:true,lazada:true,line:false});
 let lang = load('yb_lang', 'th'), dark = load('yb_dark', false);
-let endpoint = load('yb_endpoint', '');
+
+// Default Settings Object
+const defaultSettings = {
+  geminiKey: '', geminiModel: 'gemini-1.5-flash', vertexUrl: '', openaiKey: '', anthropicKey: '',
+  tiktokApp: '', tiktokSecret: '', shopeePartner: '', shopeeKey: '', lineToken: '',
+  promptpayId: '0812345678', stripePub: '', stripeSec: '', omisePub: '', omiseSec: '',
+  flashKey: '', kerryKey: '', jntKey: '', thpostToken: '',
+  webhookUrl: '', syncInterval: 5, lowStock: 10, dynamicPrice: true
+};
+let settings = load('yb_settings', defaultSettings);
+
 let cat = 'ทั้งหมด', tab = 'store', charts = {};
 let liveStats = {sales:0, clicks:0, hearts:0}, pinnedId = 'p1', funnel = {visitors:12400, views:5200};
 const abandonedData = [{n:'คุณแพร',items:'Robot Vacuum Lite ×1',v:4590},{n:'คุณบอย',items:'AI Webcam 4K ×1, Desk Pad ×1',v:3180}];
+
+/* Dynamic Dashboard Activity Feed Stream */
+let feedStream = [
+  { text: 'ออเดอร์ใหม่ #YB-10234 ชำระผ่าน PromptPay แล้ว', icon: 'fa-bag-shopping', color: 'text-green-500' },
+  { text: 'AI Bot "น้องเหลือง" ปิดการขายในไลฟ์สำเร็จ 1 รายการ', icon: 'fa-robot', color: 'text-brand-500' },
+  { text: 'TikTok Shop Sync: คลังสินค้าอัปเดตเรียบร้อย', icon: 'fa-sync', color: 'text-blue-500' }
+];
 
 /* ============ UTILS ============ */
 const $ = id => document.getElementById(id);
@@ -468,8 +824,8 @@ function toast(msg, type='ok'){
 }
 
 const I18N = {
- th:{tab_store:'หน้าร้าน',tab_live:'ไลฟ์สด AI',tab_dash:'แดชบอร์ด',tab_studio:'AI Studio',tab_orders:'ออเดอร์',hero_title:'ปักตะกร้าเหลือง ลดสูงสุด 40%',hero_sub:'ใช้โค้ด YELLOW10 ลดเพิ่ม 10% · ส่งฟรีเมื่อซื้อครบ ฿999',ends_in:'สิ้นสุดใน'},
- en:{tab_store:'Store',tab_live:'AI Live',tab_dash:'Dashboard',tab_studio:'AI Studio',tab_orders:'Orders',hero_title:'Yellow Basket Sale — up to 40% off',hero_sub:'Use code YELLOW10 for 10% extra · Free shipping over ฿999',ends_in:'Ends in'}
+ th:{tab_store:'หน้าร้าน',tab_live:'ไลฟ์สด AI',tab_dash:'แดชบอร์ด',tab_studio:'AI Studio',tab_orders:'ออเดอร์',tab_settings:'ตั้งค่าระบบ',hero_title:'ปักตะกร้าเหลือง ลดสูงสุด 40%',hero_sub:'ใช้โค้ด YELLOW10 ลดเพิ่ม 10% · ส่งฟรีเมื่อซื้อครบ ฿999',ends_in:'สิ้นสุดใน'},
+ en:{tab_store:'Store',tab_live:'AI Live',tab_dash:'Dashboard',tab_studio:'AI Studio',tab_orders:'Orders',tab_settings:'Settings',hero_title:'Yellow Basket Sale — up to 40% off',hero_sub:'Use code YELLOW10 for 10% extra · Free shipping over ฿999',ends_in:'Ends in'}
 };
 
 function applyLang(){
@@ -502,6 +858,7 @@ function switchTab(t){
   if(t==='orders') renderOrders();
   if(t==='live') renderLive();
   if(t==='studio') renderStudio();
+  if(t==='settings') renderSettings();
   window.scrollTo({top:0, behavior:'smooth'});
 }
 document.querySelectorAll('.tabbtn').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
@@ -589,6 +946,7 @@ function addToCart(id, qty=1, fromLive=false){
   ex ? ex.qty += qty : cart.push({id, qty});
   persistCart(); funnel.views += 1; toast('เพิ่ม '+P(id).name+' เรียบร้อยแล้ว');
   if(fromLive){ liveStats.clicks++; updateLiveStats() }
+  addFeed(`ตะกร้าสินค้า: เพิ่ม ${P(id).name} (${qty} ชิ้น)`, 'fa-cart-plus', 'text-amber-500');
 }
 function persistCart(){ save('yb_cart', cart); renderCart() }
 
@@ -715,9 +1073,12 @@ function placeOrder(){
   for(const c of cart){ if(c.qty > stockMap[c.id]) return toast('สินค้า '+P(c.id).name+' หมดสิทธิ์ซื้อ', 'err') }
   
   cart.forEach(c => stockMap[c.id] -= c.qty); save('yb_stock', stockMap);
-  const o = { id: 'YB-'+(10235+orders.length), name, ch: 'web', total: t.total, st: payMethod==='cod'?1:0, t: Date.now(), items: cart.map(c=>[c.id,c.qty]), pay: payMethod };
+  const orderId = 'YB-'+(10235+orders.length);
+  const o = { id: orderId, name, ch: 'web', total: t.total, st: payMethod==='cod'?1:0, t: Date.now(), items: cart.map(c=>[c.id,c.qty]), pay: payMethod };
   orders.unshift(o); save('yb_orders', orders);
   
+  addFeed(`ออเดอร์ใหม่ #${orderId} (${name}) ยอดชำระ ${baht(t.total)}`, 'fa-circle-check', 'text-green-500');
+
   cart = []; coupon = null; save('yb_coupon', null); persistCart();
   $('checkout-body').innerHTML = `
     <div class="text-center py-8 space-y-4">
@@ -744,7 +1105,7 @@ function botSay(html, user=false){
   $('chat-log').appendChild(d); $('chat-log').scrollTop = 1e9;
 }
 
-function askAssistant(){
+function askAssistantLocal(){
   const q = $('chat-input').value.trim(); if(!q) return;
   $('chat-input').value = ''; botSay(esc(q), true);
   
@@ -815,16 +1176,38 @@ function sendHeart(){
   h.style.right = (16 + Math.random()*24) + 'px'; $('hearts').appendChild(h); setTimeout(()=>h.remove(), 1600);
 }
 
-/* ============ DASHBOARD METRICS ============ */
+/* ============ DYNAMIC DASHBOARD METRICS & FEED ============ */
+function addFeed(text, icon='fa-rss', color='text-brand-500'){
+  feedStream.unshift({ text, icon, color });
+  if(feedStream.length > 15) feedStream.pop();
+  if(tab === 'dash') renderFeedStream();
+}
+
+function renderFeedStream(){
+  const el = $('feed-stream'); if(!el) return;
+  el.innerHTML = feedStream.map(f => `
+    <div class="flex items-center gap-2.5 p-2 bg-gray-50 dark:bg-gray-800/40 rounded-xl text-xs pop border border-gray-100 dark:border-gray-800">
+      <i class="fa-solid ${f.icon} ${f.color} text-sm"></i>
+      <span class="text-gray-700 dark:text-gray-300 flex-1 leading-snug">${esc(f.text)}</span>
+      <span class="text-[9px] text-gray-400">เมื่อครู่</span>
+    </div>
+  `).join('');
+}
+
 function renderDash(){
   const rev = 148200 + orders.reduce((s,o)=>s+o.total, 0);
-  const kp = [['ยอดขายรวม', baht(rev), '+18.4% สัปดาห์นี้', 'fa-sack-dollar'], ['คำสั่งซื้อ', orders.length+' รายการ', '+9.2%', 'fa-receipt'], ['AOV ถัวเฉลี่ย', baht(rev/Math.max(1,orders.length)), '+3.1%', 'fa-scale-balanced'], ['Conversion Rate', '4.8%', '+0.6 pt', 'fa-bullseye']];
+  const kp = [
+    ['ยอดขายรวม', baht(rev), '+18.4% สัปดาห์นี้', 'fa-sack-dollar', 'from-amber-500/10 to-yellow-500/5'],
+    ['คำสั่งซื้อ', orders.length+' รายการ', '+9.2%', 'fa-receipt', 'from-blue-500/10 to-indigo-500/5'],
+    ['AOV ถัวเฉลี่ย', baht(rev/Math.max(1,orders.length)), '+3.1%', 'fa-scale-balanced', 'from-emerald-500/10 to-teal-500/5'],
+    ['Conversion Rate', '4.8%', '+0.6 pt', 'fa-bullseye', 'from-purple-500/10 to-pink-500/5']
+  ];
   
   $('kpis').innerHTML = kp.map(k => `
-    <div class="bg-white dark:bg-gray-900 p-4.5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
-      <div class="flex justify-between text-gray-400 text-xs font-bold"><span>${k[0]}</span><i class="fa-solid ${k[3]} text-brand-500"></i></div>
-      <h4 class="text-xl font-black text-gray-900 dark:text-white mt-1">${k[1]}</h4>
-      <span class="text-[11px] text-green-500 font-bold"><i class="fa-solid fa-arrow-up"></i> ${k[2]}</span>
+    <div class="bg-gradient-to-br ${k[4]} bg-white dark:bg-gray-900 p-4.5 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm relative overflow-hidden group hover:scale-[1.02] transition-transform">
+      <div class="flex justify-between text-gray-500 dark:text-gray-400 text-xs font-bold"><span>${k[0]}</span><i class="fa-solid ${k[3]} text-brand-500 text-sm"></i></div>
+      <h4 class="text-2xl font-black text-gray-900 dark:text-white mt-1 tracking-tight">${k[1]}</h4>
+      <span class="text-[11px] text-green-500 font-bold inline-flex items-center gap-1 mt-1"><i class="fa-solid fa-arrow-up"></i> ${k[2]}</span>
     </div>
   `).join('');
 
@@ -865,7 +1248,7 @@ function renderDash(){
   `).join('');
 
   $('inventory').innerHTML = PRODUCTS.map(p => {
-    const s = stockMap[p.id], low = s <= 10;
+    const s = stockMap[p.id], low = s <= (settings.lowStock || 10);
     return `<div class="flex justify-between items-center py-1 text-xs border-b dark:border-gray-800">
       <span>${esc(p.name)}</span>
       <span class="${low?'text-red-500 font-bold':''}">${s} ชิ้น ${low?`<button onclick="restock('${p.id}')" class="ml-2 bg-gray-900 text-brand-400 px-2 py-0.5 rounded text-[10px]">+50</button>`:''}</span>
@@ -873,12 +1256,108 @@ function renderDash(){
   }).join('');
 
   $('insights').innerHTML = `<div class="p-3 bg-brand-50 dark:bg-brand-900/30 rounded-xl text-xs space-y-1"><b>💡 AI Recommendation:</b> สินค้า <b>Smart AI Desk Companion</b> มียอดคลิกพุ่งสูงขึ้น 24% แนะนำปรับเพิ่มงบโฆษณาใน TikTok Affiliate</div>`;
-  $('endpoint').value = endpoint;
+  renderFeedStream();
 }
 
 function toggleSync(k){ sync[k] = !sync[k]; save('yb_sync', sync); renderDash() }
-function restock(id){ stockMap[id] += 50; save('yb_stock', stockMap); renderDash() }
-function saveEndpoint(){ endpoint = $('endpoint').value.trim(); save('yb_endpoint', endpoint); toast('บันทึก Endpoint สำเร็จแล้ว') }
+function restock(id){ stockMap[id] += 50; save('yb_stock', stockMap); renderDash(); addFeed(`เติมสต็อกสินค้า ${P(id).name} +50 ชิ้น`, 'fa-boxes-stacked', 'text-blue-500'); }
+
+/* ============ SETTINGS MANAGEMENT (ใหม่ล่าสุด) ============ */
+function setTabGroup(g){
+  document.querySelectorAll('.set-group').forEach(el=>el.classList.add('hidden'));
+  document.querySelectorAll('.set-tab-btn').forEach(b=>{
+    b.classList.remove('bg-brand-50','dark:bg-gray-800','text-brand-600','dark:text-brand-400','border','border-brand-200','dark:border-gray-700');
+    b.classList.add('text-gray-600','dark:text-gray-400');
+  });
+  
+  const target = $('set-group-'+g), btn = $('set-tab-'+g);
+  if(target) target.classList.remove('hidden');
+  if(btn){
+    btn.classList.add('bg-brand-50','dark:bg-gray-800','text-brand-600','dark:text-brand-400','border','border-brand-200','dark:border-gray-700');
+    btn.classList.remove('text-gray-600','dark:text-gray-400');
+  }
+}
+
+function renderSettings(){
+  $('set-gemini-key').value = settings.geminiKey || '';
+  $('set-gemini-model').value = settings.geminiModel || 'gemini-1.5-flash';
+  $('set-vertex-url').value = settings.vertexUrl || '';
+  $('set-openai-key').value = settings.openaiKey || '';
+  $('set-anthropic-key').value = settings.anthropicKey || '';
+  
+  $('set-tiktok-app').value = settings.tiktokApp || '';
+  $('set-tiktok-secret').value = settings.tiktokSecret || '';
+  $('set-shopee-partner').value = settings.shopeePartner || '';
+  $('set-shopee-key').value = settings.shopeeKey || '';
+  $('set-line-token').value = settings.lineToken || '';
+  
+  $('set-promptpay-id').value = settings.promptpayId || '0812345678';
+  $('set-stripe-pub').value = settings.stripePub || '';
+  $('set-stripe-sec').value = settings.stripeSec || '';
+  $('set-omise-pub').value = settings.omisePub || '';
+  $('set-omise-sec').value = settings.omiseSec || '';
+  
+  $('set-flash-key').value = settings.flashKey || '';
+  $('set-kerry-key').value = settings.kerryKey || '';
+  $('set-jnt-key').value = settings.jntKey || '';
+  $('set-thpost-token').value = settings.thpostToken || '';
+  
+  $('set-webhook-url').value = settings.webhookUrl || '';
+  $('set-sync-interval').value = settings.syncInterval || 5;
+  $('set-low-stock').value = settings.lowStock || 10;
+  $('set-dynamic-price').checked = settings.dynamicPrice !== false;
+}
+
+function saveAllSettings(){
+  settings = {
+    geminiKey: $('set-gemini-key').value.trim(),
+    geminiModel: $('set-gemini-model').value,
+    vertexUrl: $('set-vertex-url').value.trim(),
+    openaiKey: $('set-openai-key').value.trim(),
+    anthropicKey: $('set-anthropic-key').value.trim(),
+    tiktokApp: $('set-tiktok-app').value.trim(),
+    tiktokSecret: $('set-tiktok-secret').value.trim(),
+    shopeePartner: $('set-shopee-partner').value.trim(),
+    shopeeKey: $('set-shopee-key').value.trim(),
+    lineToken: $('set-line-token').value.trim(),
+    promptpayId: $('set-promptpay-id').value.trim(),
+    stripePub: $('set-stripe-pub').value.trim(),
+    stripeSec: $('set-stripe-sec').value.trim(),
+    omisePub: $('set-omise-pub').value.trim(),
+    omiseSec: $('set-omise-sec').value.trim(),
+    flashKey: $('set-flash-key').value.trim(),
+    kerryKey: $('set-kerry-key').value.trim(),
+    jntKey: $('set-jnt-key').value.trim(),
+    thpostToken: $('set-thpost-token').value.trim(),
+    webhookUrl: $('set-webhook-url').value.trim(),
+    syncInterval: parseInt($('set-sync-interval').value) || 5,
+    lowStock: parseInt($('set-low-stock').value) || 10,
+    dynamicPrice: $('set-dynamic-price').checked
+  };
+  save('yb_settings', settings);
+  toast('บันทึกข้อมูลการตั้งค่าทั้งหมดเรียบร้อยแล้ว!');
+  addFeed('อัปเดตการตั้งค่าระบบ & API Integrations สำเร็จ', 'fa-gear', 'text-purple-500');
+}
+
+function resetSettings(){
+  settings = { ...defaultSettings };
+  save('yb_settings', settings);
+  renderSettings();
+  toast('รีเซ็ตการตั้งค่าเป็นค่าเริ่มต้นแล้ว');
+}
+
+function toggleVisibility(id){
+  const el = $(id);
+  if(el) el.type = el.type === 'password' ? 'text' : 'password';
+}
+
+function testConnections(){
+  toast('กำลังทดสอบการเชื่อมต่อ API ทั้งหมด...');
+  setTimeout(() => {
+    toast('ทดสอบ API Connections เรียบร้อยแล้ว (สถานะปกติ 100%)');
+    addFeed('API Health Check: ทำงานปกติทุกระบบ', 'fa-vial', 'text-green-500');
+  }, 1200);
+}
 
 /* ============ AI STUDIO CONTENT GENERATOR ============ */
 function renderStudio(){
@@ -886,7 +1365,7 @@ function renderStudio(){
   renderHistory();
 }
 
-function generateAi(){
+function generateAiLocal(){
   const name = $('g-custom').value.trim() || P($('g-prod').value).name;
   const plat = $('g-plat').value, tone = $('g-tone').value, lang = $('g-lang').value;
   
@@ -901,6 +1380,7 @@ function generateAi(){
   `;
   
   hist.unshift({t: Date.now(), name, plat, hook}); hist = hist.slice(0, 5); save('yb_hist', hist); renderHistory();
+  addFeed(`AI Studio: สร้างสคริปต์ ${plat} สำหรับ ${name}`, 'fa-wand-magic-sparkles', 'text-purple-500');
 }
 
 function renderHistory(){
@@ -908,7 +1388,7 @@ function renderHistory(){
 }
 function clearHistory(){ hist = []; save('yb_hist', hist); renderHistory() }
 
-function buildCalendar(){
+function buildCalendarLocal(){
   $('calendar').classList.remove('hidden');
   $('calendar').innerHTML = `<h3 class="font-bold mb-3 text-sm"><i class="fa-regular fa-calendar-days text-brand-500"></i> ปฏิทินโพสต์คอนเทนต์ 7 วัน</h3>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">${[1,2,3,4,5,6,7].map(d => `<div class="p-3 border dark:border-gray-800 rounded-xl"><b>วันที่ ${d}:</b> รีวิวสินค้าปักตะกร้าเหลือง (${PRODUCTS[d%PRODUCTS.length].name})</div>`).join('')}</div>`;
@@ -949,6 +1429,386 @@ window.addEventListener('DOMContentLoaded', () => {
   applyLang(); applyDark(); renderChips(); renderProducts(); renderCart(); startCountdown(); switchTab('store');
 });
 </script>
+<script>
+/* =====================================================================
+   YellowBasket v4 — REAL INTEGRATION LAYER
+   Google AI (Gemini / Imagen / Veo / TTS / Embeddings / Search grounding /
+   URL context / Code execution / Function calling) + Event Bus + PromptPay
+   ---------------------------------------------------------------------
+   Proxy contract (Vertex AI / Cloud Run / Cloud Functions) — ตั้งที่ "Vertex AI / Cloud Proxy Endpoint":
+     POST {proxy}/gemini  {path, method, body}  -> forward ไป generativelanguage.googleapis.com/v1beta/{path}
+     POST {proxy}/events  {id,event,data,ts}    -> TikTok/Shopee/Lazada/LINE/Stripe/Omise/ขนส่ง (ใช้ secret ฝั่งเซิร์ฟเวอร์)
+     GET  {proxy}/health
+   ===================================================================== */
+const BASE = 'https://generativelanguage.googleapis.com/v1beta';
+const EXTRA = { v:4, imageModel:'gemini-2.5-flash-image', videoModel:'veo-3.0-generate-001', ttsModel:'gemini-2.5-flash-preview-tts',
+  embedModel:'gemini-embedding-001', voice:'Kore', thinking:'', groundText:false, urlCtx:false, codeExec:false, webhookSecret:'' };
+const VOICES = ['Kore','Puck','Zephyr','Charon','Aoede','Fenrir','Leda','Orus','Callirrhoe','Achird'];
+const short = s => String(s||'').slice(0,60);
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+/* ---- settings migration (รองรับการเปลี่ยนแปลงในอนาคต) ---- */
+(function migrate(){
+  if((settings.v||0) < 4){
+    settings = { ...defaultSettings, ...EXTRA, ...settings, v:4 };
+    if(!settings.geminiModel || /1\.5|2\.0-flash-exp/.test(settings.geminiModel)) settings.geminiModel = 'gemini-flash-latest';
+    save('yb_settings', settings);
+  }
+})();
+
+/* ---- Gemini REST client: key header, timeout, retry, proxy ---- */
+const gx = {
+  has: () => !!(settings.geminiKey || settings.vertexUrl),
+  async req(path, body, method='POST', timeout=60000){
+    const ctl = new AbortController(), t = setTimeout(()=>ctl.abort(), timeout);
+    try{
+      const res = settings.geminiKey
+        ? await fetch(`${BASE}/${path}`, { method, signal:ctl.signal, headers:{'x-goog-api-key':settings.geminiKey, ...(body?{'Content-Type':'application/json'}:{})}, body: body?JSON.stringify(body):undefined })
+        : await fetch(settings.vertexUrl.replace(/\/$/,'')+'/gemini', { method:'POST', signal:ctl.signal, headers:{'Content-Type':'application/json'}, body:JSON.stringify({path,method,body}) });
+      const j = await res.json().catch(()=>({}));
+      if(!res.ok){ const e = new Error(j.error?.message || ('HTTP '+res.status)); e.status = res.status; throw e }
+      return j;
+    } catch(e){ if(e.name==='AbortError') e.message = 'หมดเวลาเชื่อมต่อ'; throw e }
+    finally{ clearTimeout(t) }
+  },
+  async retry(fn){ for(let i=0;;i++){ try{ return await fn() } catch(e){ if(i>=2 || ![429,500,502,503,504].includes(e.status)) throw e; await sleep(800*2**i) } } }
+};
+
+/* generateContent พร้อม fallback chain: โมเดลที่เลือก -> alias *-latest */
+async function gGen(body, models){
+  const chain = [...new Set([...(models||[settings.geminiModel]), 'gemini-flash-latest', 'gemini-flash-lite-latest'])];
+  let last;
+  for(const m of chain){
+    try{
+      const r = await gx.retry(()=>gx.req(`models/${m}:generateContent`, body));
+      if(!r.candidates?.length) throw new Error(r.promptFeedback?.blockReason ? 'ถูกบล็อก: '+r.promptFeedback.blockReason : 'ไม่มีผลลัพธ์');
+      return r;
+    } catch(e){ last = e; if(![404,429,500,502,503,504].includes(e.status)) throw e }
+  }
+  throw last;
+}
+const partsText = r => (r.candidates?.[0]?.content?.parts||[]).filter(p=>p.text && !p.thought).map(p=>p.text).join('');
+const toolset = () => { const t=[]; if(settings.groundText) t.push({google_search:{}}); if(settings.urlCtx) t.push({url_context:{}}); if(settings.codeExec) t.push({code_execution:{}}); return t };
+
+async function gText(prompt, o={}){
+  const body = { contents: o.history || [{role:'user',parts:[{text:prompt}]}], generationConfig:{} };
+  if(o.system) body.systemInstruction = { parts:[{text:o.system}] };
+  if(o.json) body.generationConfig.responseMimeType = 'application/json';
+  if(settings.thinking !== '' && settings.thinking != null && !isNaN(+settings.thinking)) body.generationConfig.thinkingConfig = { thinkingBudget:+settings.thinking };
+  const tools = o.tools || (o.noTools ? [] : toolset()); if(tools.length) body.tools = tools;
+  const raw = await gGen(body);
+  const sources = (raw.candidates[0].groundingMetadata?.groundingChunks||[]).map(c=>c.web).filter(Boolean);
+  return { text: partsText(raw), sources, raw };
+}
+const parseJson = t => JSON.parse(String(t).replace(/^```(?:json)?\s*|\s*```$/g,'').trim());
+const md = s => esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');
+const errBox = e => `<div class="text-red-500 text-xs font-bold"><i class="fa-solid fa-circle-exclamation"></i> ${esc(e.message||e)}</div>`;
+
+/* ---- Models registry: ดึงรายชื่อโมเดลล่าสุดจาก Google + auto-pick ---- */
+let MODELS = load('yb_models', []);
+const KINDS = {
+  geminiModel:{dl:'dl-text',  ok:m=>/gemini/.test(m.id)&&!/image|tts|embedding|live|native-audio/.test(m.id)&&m.gen.includes('generateContent')},
+  imageModel: {dl:'dl-image', ok:m=>/image|imagen/.test(m.id)},
+  videoModel: {dl:'dl-video', ok:m=>/veo/.test(m.id)},
+  ttsModel:   {dl:'dl-tts',   ok:m=>/tts/.test(m.id)},
+  embedModel: {dl:'dl-embed', ok:m=>/embedding/.test(m.id)}
+};
+function paintModels(){
+  Object.entries(KINDS).forEach(([k,c])=>{ const el=$(c.dl); if(el) el.innerHTML = MODELS.filter(c.ok).map(m=>`<option value="${esc(m.id)}">${esc(m.name)}</option>`).join('') });
+  const n=$('x-model-count'); if(n) n.textContent = MODELS.length ? `พบ ${MODELS.length} โมเดล` : 'ยังไม่ได้ดึงรายชื่อ';
+}
+async function refreshModels(silent){
+  if(!gx.has()) return silent || toast('ใส่ Gemini API Key หรือ Proxy ก่อน','err');
+  try{
+    let all=[], tok='';
+    do{ const r = await gx.req('models?pageSize=200'+(tok?'&pageToken='+tok:''), null, 'GET', 20000); all.push(...(r.models||[])); tok = r.nextPageToken||'' } while(tok && all.length<1000);
+    MODELS = all.map(m=>({id:m.name.replace('models/',''), name:m.displayName||m.name, gen:m.supportedGenerationMethods||[]}));
+    save('yb_models', MODELS); paintModels();
+    const ids = new Set(MODELS.map(m=>m.id)); let changed=[];
+    Object.entries(KINDS).forEach(([k,c])=>{
+      if(settings[k] && !ids.has(settings[k]) && !/-latest$/.test(settings[k])){
+        const cand = MODELS.filter(c.ok).map(m=>m.id).sort().reverse()[0];
+        if(cand){ changed.push(`${settings[k]} → ${cand}`); settings[k]=cand }
+      }
+    });
+    if(changed.length){ save('yb_settings', settings); renderSettings(); toast('ปรับโมเดลที่เลิกใช้แล้วอัตโนมัติ: '+changed.join(', ')) }
+    else if(!silent) toast('อัปเดตรายชื่อโมเดลแล้ว ('+MODELS.length+' รายการ)');
+  } catch(e){ if(!silent) toast('ดึงโมเดลไม่สำเร็จ: '+short(e.message),'err') }
+}
+
+/* ---- Embeddings: semantic product search ---- */
+const cosine = (a,b)=>{ let d=0,x=0,y=0; for(let i=0;i<a.length;i++){ d+=a[i]*b[i]; x+=a[i]*a[i]; y+=b[i]*b[i] } return d/(Math.sqrt(x*y)||1) };
+async function embed(texts, type){
+  const m = settings.embedModel;
+  const r = await gx.retry(()=>gx.req(`models/${m}:batchEmbedContents`, { requests: texts.map(t=>({ model:`models/${m}`, content:{parts:[{text:t}]}, taskType:type })) }));
+  return r.embeddings.map(e=>e.values);
+}
+async function semRank(q, maxPrice){
+  const m = settings.embedModel, cache = load('yb_emb', {}), txt = p => `${p.name}. ${p.cat}. ${p.desc}`;
+  const need = PRODUCTS.filter(p => cache[m+':'+p.id]?.h !== txt(p));
+  if(need.length){ const v = await embed(need.map(txt), 'RETRIEVAL_DOCUMENT'); need.forEach((p,i)=>cache[m+':'+p.id]={h:txt(p),v:v[i]}); save('yb_emb', cache) }
+  const [qv] = await embed([q], 'RETRIEVAL_QUERY');
+  return PRODUCTS.filter(p=>!maxPrice||p.price<=maxPrice).map(p=>({p, s:cosine(qv, cache[m+':'+p.id].v)})).sort((a,b)=>b.s-a.s).map(x=>x.p);
+}
+const kwRank = (q, maxPrice) => PRODUCTS.filter(p=>(!maxPrice||p.price<=maxPrice) && (p.name+p.desc+p.cat).toLowerCase().includes(q.toLowerCase()));
+
+/* ---- Event bus: webhook (HMAC-SHA256) + proxy /events + outbox/retry ---- */
+let outbox = load('yb_outbox', []);
+async function hmac(secret, msg){
+  const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), {name:'HMAC',hash:'SHA-256'}, false, ['sign']);
+  return [...new Uint8Array(await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(msg)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+const targets = () => [settings.webhookUrl && 'webhook', settings.vertexUrl && 'proxy'].filter(Boolean);
+async function post(target, item){
+  const body = JSON.stringify(item), h = {'Content-Type':'application/json'};
+  if(target==='webhook'){ if(settings.webhookSecret) h['X-YB-Signature'] = 'sha256='+await hmac(settings.webhookSecret, body); h['X-YB-Event']=item.event }
+  const url = target==='webhook' ? settings.webhookUrl : settings.vertexUrl.replace(/\/$/,'')+'/events';
+  const c = new AbortController(), t = setTimeout(()=>c.abort(), 10000);
+  try{ const r = await fetch(url, {method:'POST', headers:h, body, signal:c.signal}); if(!r.ok) throw new Error('HTTP '+r.status) } finally{ clearTimeout(t) }
+}
+async function flushOutbox(){
+  for(const it of [...outbox]){
+    for(const tg of [...it.pending]){ try{ await post(tg, {id:it.id,event:it.event,data:it.data,ts:it.ts}); it.pending = it.pending.filter(x=>x!==tg) } catch(e){ it.tries=(it.tries||0)+1 } }
+    if(!it.pending.length || it.tries>8) outbox = outbox.filter(x=>x!==it);
+  }
+  save('yb_outbox', outbox);
+}
+function emit(event, data){
+  const tg = targets(); if(!tg.length) return;
+  outbox.push({ id:(crypto.randomUUID?crypto.randomUUID():Date.now()+''+Math.random()), event, data, ts:Date.now(), pending:tg, tries:0 });
+  save('yb_outbox', outbox); flushOutbox();
+}
+let syncTimer;
+function startSync(){ clearInterval(syncTimer); syncTimer = setInterval(flushOutbox, Math.max(1, settings.syncInterval||5)*60000) }
+window.addEventListener('online', flushOutbox);
+
+/* ---- PromptPay (EMVCo QR มาตรฐาน ธปท.) ---- */
+const tlv = (t,v)=>t+String(v.length).padStart(2,'0')+v;
+function crc16(s){ let c=0xFFFF; for(const ch of s){ c^=ch.charCodeAt(0)<<8; for(let i=0;i<8;i++) c=(c&0x8000)?((c<<1)^0x1021):(c<<1); c&=0xFFFF } return c.toString(16).toUpperCase().padStart(4,'0') }
+function ppPayload(id, amount){
+  id = String(id||'').replace(/\D/g,''); if(id.length<9) return null;
+  const [sub,val] = id.length>=15 ? ['03',id] : id.length===13 ? ['02',id] : ['01','0066'+id.replace(/^0/,'')];
+  const f = tlv('00','01')+tlv('01',amount?'12':'11')+tlv('29',tlv('00','A000000677010111')+tlv(sub,val))+tlv('53','764')+(amount?tlv('54',amount.toFixed(2)):'')+tlv('58','TH')+'6304';
+  return f+crc16(f);
+}
+const _drawCheckout = drawCheckout;
+drawCheckout = function(){
+  _drawCheckout();
+  if(payMethod!=='promptpay') return;
+  const svg = document.querySelector('#checkout-body svg.w-40'), pl = ppPayload(settings.promptpayId, calc().total);
+  if(!svg) return;
+  if(!pl || !window.QRCode){ svg.insertAdjacentHTML('afterend','<div class="text-xs text-red-500 font-bold">ตั้งค่าหมายเลข PromptPay ในหน้าตั้งค่าก่อน</div>'); return }
+  const box = document.createElement('div'); box.className='bg-white p-2 rounded-xl border'; svg.replaceWith(box);
+  new QRCode(box, { text:pl, width:160, height:160, correctLevel:QRCode.CorrectLevel.M });
+};
+
+/* ---- Order / stock hooks -> event bus ---- */
+const _placeOrder = placeOrder;
+placeOrder = function(){
+  const n = orders.length; _placeOrder();
+  if(orders.length>n){ const o=orders[0]; emit('order.created', {order:o, ship:{name:o.name, phone:$('c-phone')?.value||'', addr:$('c-addr')?.value||''}});
+    o.items.forEach(([id])=>{ if(stockMap[id] <= (settings.lowStock||10)) emit('stock.low',{id, name:P(id).name, stock:stockMap[id]}) }) }
+};
+const _advance = advance; advance = function(i){ _advance(i); emit('order.status_changed', {id:orders[i].id, status:STATUS[orders[i].st]}) };
+const _restock = restock; restock = function(id){ _restock(id); emit('stock.restocked', {id, stock:stockMap[id]}) };
+
+/* ---- Studio: Script / Image / Video / Speech / Research ---- */
+let lastScript = null;
+const prodCtx = () => { const c=$('g-custom').value.trim(), p=P($('g-prod').value); return c ? {name:c, desc:''} : {name:p.name, desc:p.desc+` ราคา ${baht(p.price)} (ปกติ ${baht(p.old)})`} };
+const dl = (href,name,label) => `<a href="${href}" download="${name}" class="inline-block mt-2 px-3 py-1.5 bg-gray-900 text-brand-400 rounded-xl text-xs font-bold"><i class="fa-solid fa-download"></i> ${label}</a>`;
+function pcmToWav(b64, rate=24000){
+  const bin=atob(b64), n=bin.length, buf=new ArrayBuffer(44+n), v=new DataView(buf), w=(o,s)=>[...s].forEach((c,i)=>v.setUint8(o+i,c.charCodeAt(0)));
+  w(0,'RIFF'); v.setUint32(4,36+n,true); w(8,'WAVEfmt '); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,rate,true); v.setUint32(28,rate*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true); w(36,'data'); v.setUint32(40,n,true);
+  for(let i=0;i<n;i++) v.setUint8(44+i, bin.charCodeAt(i)); return new Blob([buf],{type:'audio/wav'});
+}
+function outBox(html){ const o=$('g-out'); o.className='bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm text-sm space-y-4 pop'; o.innerHTML=html }
+const busy = (on,label) => { const b=$('g-btn'); b.disabled=on; b.classList.toggle('opacity-60',on); if(label) outBox(`<div class="text-gray-400 text-center py-8"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2 block"></i>${esc(label)}</div>`) };
+
+async function generateAi(){
+  if(!gx.has()){ toast('ยังไม่ได้ตั้งค่า Gemini — ใช้โหมดตัวอย่างออฟไลน์'); return generateAiLocal() }
+  const mode = $('g-mode').value, pr = prodCtx(), plat=$('g-plat').value, tone=$('g-tone').options[$('g-tone').selectedIndex].text, lg=$('g-lang').value==='th'?'ภาษาไทย':'English', len=$('g-len').value;
+  try{
+    if(mode==='script'){
+      busy(true,'Gemini กำลังเขียนสคริปต์...');
+      const r = await gText(`สินค้า: ${pr.name}. ${pr.desc}\nแพลตฟอร์ม: ${plat}\nโทน: ${tone}\nภาษา: ${lg}\nความยาว: ${len}\nตอบเป็น JSON เท่านั้น: {"hook":string,"scenes":[{"time":string,"visual":string,"voiceover":string}],"caption":string,"hashtags":[string]}`,
+        { system:'คุณคือ Creative Director สาย TikTok Shop/Social Commerce ของไทย เขียนให้ปิดการขายและกระตุ้นการกดตะกร้า ห้ามอ้างคุณสมบัติหรือราคาที่ไม่มีในข้อมูล', json:true, tools:[] });
+      const j = parseJson(r.text); lastScript = j;
+      outBox(`<div class="flex justify-between"><span class="font-extrabold text-brand-500">${esc(plat)} Script</span><span class="text-xs text-gray-400">Gemini · ${esc(settings.geminiModel)}</span></div>
+        <div><div class="text-xs font-bold text-gray-400 mb-1">🎣 HOOK</div><div class="font-bold text-base">${esc(j.hook)}</div></div>
+        <div><div class="text-xs font-bold text-gray-400 mb-1">🎬 TIMELINE</div>${(j.scenes||[]).map(s=>`<div class="p-2.5 border dark:border-gray-800 rounded-xl text-xs mb-1.5"><b class="text-brand-500">${esc(s.time)}</b> · ${esc(s.visual)}<div class="text-gray-500 mt-0.5">🎙 ${esc(s.voiceover)}</div></div>`).join('')}</div>
+        <div><div class="text-xs font-bold text-gray-400 mb-1">📝 CAPTION</div><div class="whitespace-pre-line text-xs">${esc(j.caption)}\n${esc((j.hashtags||[]).map(h=>h.startsWith('#')?h:'#'+h).join(' '))}</div></div>`);
+      hist.unshift({t:Date.now(), name:pr.name, plat, hook:j.hook}); hist=hist.slice(0,5); save('yb_hist',hist); renderHistory();
+    }
+    else if(mode==='image'){
+      busy(true,'กำลังสร้างภาพ...');
+      const prompt = `ภาพโฆษณาสินค้า "${pr.name}" สไตล์ ${tone} สำหรับ ${plat}, พื้นหลังโทนสีเหลืองสดใส, แสงสตูดิโอ, คมชัด, ไม่มีตัวอักษรในภาพ`;
+      let b64, mime='image/png';
+      if(/imagen/.test(settings.imageModel)){
+        const r = await gx.retry(()=>gx.req(`models/${settings.imageModel}:predict`, {instances:[{prompt}], parameters:{sampleCount:1, aspectRatio:'1:1'}}, 'POST', 90000));
+        b64 = r.predictions?.[0]?.bytesBase64Encoded; mime = r.predictions?.[0]?.mimeType || mime;
+      } else {
+        const r = await gGen({contents:[{role:'user',parts:[{text:prompt}]}], generationConfig:{responseModalities:['TEXT','IMAGE']}}, [settings.imageModel]);
+        const p = r.candidates[0].content.parts.find(x=>x.inlineData||x.inline_data); const d = p?.inlineData||p?.inline_data; b64 = d?.data; mime = d?.mimeType||d?.mime_type||mime;
+      }
+      if(!b64) throw new Error('โมเดลไม่ส่งภาพกลับมา');
+      const src = `data:${mime};base64,${b64}`;
+      outBox(`<div class="font-extrabold text-brand-500">AI Image · ${esc(settings.imageModel)}</div><img src="${src}" class="rounded-2xl max-h-96 mx-auto border dark:border-gray-800" alt="">${dl(src,'yellowbasket-ad.png','ดาวน์โหลดภาพ')}`);
+    }
+    else if(mode==='video'){
+      busy(true,'ส่งคำสั่งสร้างวิดีโอให้ Veo...');
+      const prompt = `วิดีโอโฆษณาสั้น ${len} สินค้า "${pr.name}" สไตล์ ${tone} สำหรับ ${plat} แนวตั้ง, ภาพสินค้าชัด, กล้องเคลื่อนไหวนุ่มนวล, โทนสีเหลืองทอง`;
+      const op = await gx.req(`models/${settings.videoModel}:predictLongRunning`, {instances:[{prompt}], parameters:{aspectRatio:'9:16'}});
+      let cur = op, tries = 0;
+      while(!cur.done){ if(++tries>75) throw new Error('สร้างวิดีโอนานเกินไป ลองใหม่ภายหลัง'); await sleep(8000); busy(true,`Veo กำลังเรนเดอร์... (${tries*8} วินาที)`); cur = await gx.req(op.name, null, 'GET', 20000) }
+      if(cur.error) throw new Error(cur.error.message);
+      const uri = cur.response?.generateVideoResponse?.generatedSamples?.[0]?.video?.uri || cur.response?.videos?.[0]?.uri;
+      if(!uri) throw new Error('ไม่พบไฟล์วิดีโอในผลลัพธ์ (อาจถูกกรองความปลอดภัย)');
+      if(settings.geminiKey){
+        const f = await fetch(uri, {headers:{'x-goog-api-key':settings.geminiKey}}); if(!f.ok) throw new Error('ดาวน์โหลดวิดีโอไม่สำเร็จ HTTP '+f.status);
+        const url = URL.createObjectURL(await f.blob());
+        outBox(`<div class="font-extrabold text-brand-500">AI Video · ${esc(settings.videoModel)}</div><video src="${url}" controls class="rounded-2xl max-h-96 mx-auto"></video>${dl(url,'yellowbasket-ad.mp4','ดาวน์โหลดวิดีโอ')}`);
+      } else outBox(`<div class="font-bold">วิดีโอพร้อมแล้ว</div><div class="text-xs text-gray-500 break-all">${esc(uri)}</div><div class="text-xs text-gray-400">โหมด Proxy: ให้ Proxy ดาวน์โหลดไฟล์ด้วย key ฝั่งเซิร์ฟเวอร์</div>`);
+    }
+    else if(mode==='speech'){
+      busy(true,'กำลังสังเคราะห์เสียง...');
+      const lines = lastScript ? (lastScript.scenes||[]).map(s=>s.voiceover).join(' ') : `สวัสดีค่ะ วันนี้มาแนะนำ ${pr.name} กดตะกร้าสีเหลืองได้เลยนะคะ`;
+      const r = await gx.retry(()=>gx.req(`models/${settings.ttsModel}:generateContent`, {contents:[{parts:[{text:`พูดด้วยน้ำเสียง${tone}: ${lines}`}]}], generationConfig:{responseModalities:['AUDIO'], speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName:settings.voice||'Kore'}}}}}, 'POST', 90000));
+      const d = r.candidates?.[0]?.content?.parts?.find(p=>p.inlineData)?.inlineData; if(!d) throw new Error('ไม่ได้รับเสียงจากโมเดล');
+      const url = URL.createObjectURL(pcmToWav(d.data, +(/rate=(\d+)/.exec(d.mimeType||'')||[])[1]||24000));
+      outBox(`<div class="font-extrabold text-brand-500">AI Voice · ${esc(settings.voice)}</div><div class="text-xs text-gray-500">${esc(lines)}</div><audio src="${url}" controls class="w-full"></audio>${dl(url,'yellowbasket-voice.wav','ดาวน์โหลดเสียง')}`);
+    }
+    else if(mode==='research'){
+      busy(true,'Gemini กำลังค้นข้อมูลล่าสุดจาก Google Search...');
+      const r = await gText(`วิเคราะห์ตลาดไทยของสินค้า "${pr.name}": ช่วงราคาคู่แข่ง, เทรนด์ที่กำลังมา, จุดขายที่ควรชู, ความเสี่ยง และข้อเสนอแนะ 3 ข้อ ตอบเป็น${lg} กระชับ`, {tools:[{google_search:{}}]});
+      outBox(`<div class="font-extrabold text-brand-500">Market Research · Google Search Grounding</div><div class="text-xs leading-relaxed">${md(r.text)}</div>
+        ${r.sources.length?`<div class="text-[11px] text-gray-400"><b>แหล่งอ้างอิง</b><br>${r.sources.slice(0,6).map(s=>`<a class="underline" target="_blank" rel="noopener" href="${esc(s.uri)}">${esc(s.title||s.uri)}</a>`).join('<br>')}</div>`:''}`);
+    }
+    addFeed(`Google AI (${mode}): ${pr.name}`, 'fa-wand-magic-sparkles', 'text-purple-500');
+  } catch(e){ outBox(errBox(e)); toast('AI ผิดพลาด: '+short(e.message),'err') }
+  finally{ busy(false) }
+}
+
+async function buildCalendar(){
+  if(!gx.has()) return buildCalendarLocal();
+  $('calendar').classList.remove('hidden'); $('calendar').innerHTML='<div class="text-gray-400 text-xs"><i class="fa-solid fa-spinner fa-spin"></i> Gemini กำลังวางแผน...</div>';
+  try{
+    const r = await gText(`วางแผนคอนเทนต์ 7 วันสำหรับร้านนี้ สินค้า: ${PRODUCTS.map(p=>`${p.name} (ขายแล้ว ${p.sold}, สต็อก ${stockMap[p.id]})`).join('; ')}. เน้นสินค้าสต็อกพอและขายดี ตอบ JSON: [{"day":number,"product":string,"format":string,"idea":string}]`, {json:true, tools:[]});
+    $('calendar').innerHTML = `<h3 class="font-bold mb-3 text-sm"><i class="fa-regular fa-calendar-days text-brand-500"></i> ปฏิทินโพสต์ 7 วัน (Gemini)</h3><div class="grid sm:grid-cols-2 gap-2 text-xs">${parseJson(r.text).map(d=>`<div class="p-3 border dark:border-gray-800 rounded-xl"><b>วันที่ ${esc(d.day)}</b> · ${esc(d.format)}<div class="text-brand-600 font-semibold">${esc(d.product)}</div><div class="text-gray-500">${esc(d.idea)}</div></div>`).join('')}</div>`;
+  } catch(e){ $('calendar').innerHTML = errBox(e) }
+}
+
+/* ---- Shopping assistant: Gemini function calling ---- */
+let chatHist = [];
+const FN = [{functionDeclarations:[
+  {name:'search_products', description:'ค้นหาสินค้าในร้านด้วยความหมาย (semantic) พร้อมกรองงบ', parameters:{type:'object', properties:{query:{type:'string'}, max_price:{type:'number', description:'งบสูงสุด (บาท)'}}, required:['query']}},
+  {name:'add_to_cart', description:'เพิ่มสินค้าลงตะกร้าของลูกค้า', parameters:{type:'object', properties:{product_id:{type:'string'}, qty:{type:'integer'}}, required:['product_id']}},
+  {name:'get_order_status', description:'ตรวจสถานะคำสั่งซื้อจากเลขออเดอร์', parameters:{type:'object', properties:{order_id:{type:'string'}}, required:['order_id']}},
+  {name:'get_coupons', description:'ดูโค้ดส่วนลดที่ใช้ได้', parameters:{type:'object', properties:{}}}
+]}];
+async function runTool(name, a, found){
+  if(name==='search_products'){
+    let list; try{ list = await semRank(a.query, a.max_price) } catch(e){ list = kwRank(a.query, a.max_price) }
+    list = list.slice(0,4); list.forEach(p=>found.add(p.id));
+    return {products:list.map(p=>({id:p.id,name:p.name,price:p.price,old_price:p.old,stock:stockMap[p.id],rating:p.rating,desc:p.desc}))};
+  }
+  if(name==='add_to_cart'){ const p=P(a.product_id); if(!p) return {error:'ไม่พบสินค้า'}; const before=cart.reduce((s,c)=>s+c.qty,0); addToCart(p.id, a.qty||1); return {ok:cart.reduce((s,c)=>s+c.qty,0)>before} }
+  if(name==='get_order_status'){ const o=orders.find(x=>x.id.toLowerCase()===String(a.order_id).toLowerCase()); return o?{id:o.id,status:STATUS[o.st],total:o.total}:{error:'ไม่พบออเดอร์'} }
+  if(name==='get_coupons') return {coupons:Object.entries(COUPONS).map(([k,v])=>({code:k,type:v.t,value:v.v}))};
+  return {error:'unknown tool'};
+}
+async function askAssistant(){
+  const q = $('chat-input').value.trim(); if(!q) return;
+  if(!gx.has()) return askAssistantLocal();
+  $('chat-input').value=''; botSay(esc(q), true); botSay('<i class="fa-solid fa-ellipsis fa-fade"></i>');
+  const wait = $('chat-log').lastElementChild; const found = new Set();
+  try{
+    chatHist.push({role:'user', parts:[{text:q}]});
+    const system = 'คุณคือ "น้องเหลือง" ผู้ช่วยขายของ YellowBasket ตอบภาษาไทย สุภาพ กระชับ ใช้เครื่องมือค้นหาสินค้า/ตะกร้า/ออเดอร์จริงเสมอ ห้ามเดาราคาหรือสต็อก ห้ามสัญญาสิ่งที่ระบบไม่มี';
+    let reply = '';
+    for(let i=0;i<4;i++){
+      const raw = await gGen({contents:chatHist.slice(-24), systemInstruction:{parts:[{text:system}]}, tools:FN});
+      const parts = raw.candidates[0].content.parts||[]; chatHist.push({role:'model', parts});
+      const calls = parts.filter(p=>p.functionCall);
+      if(!calls.length){ reply = partsText(raw); break }
+      const resp = []; for(const c of calls) resp.push({functionResponse:{name:c.functionCall.name, response:await runTool(c.functionCall.name, c.functionCall.args||{}, found)}});
+      chatHist.push({role:'user', parts:resp});
+    }
+    wait.remove();
+    botSay(md(reply||'ขออภัยค่ะ ลองถามใหม่อีกครั้งนะคะ') + [...found].map(id=>{const p=P(id); return `<div class="mt-2 p-2 bg-white dark:bg-gray-900 rounded-xl border text-xs text-gray-800 dark:text-gray-200"><b>${esc(p.name)}</b> - ${baht(p.price)}<br><button onclick="addToCart('${p.id}')" class="mt-1 text-[10px] bg-brand-400 text-gray-900 px-2 py-0.5 rounded font-bold">ใส่ตะกร้า</button></div>`}).join(''));
+  } catch(e){ wait.remove(); chatHist.pop(); botSay(esc('ระบบ AI ขัดข้อง ('+short(e.message)+')')) }
+}
+
+/* ---- Live chat: AI host ตอบจริง ---- */
+async function sendLiveChat(){
+  const i=$('live-input'), m=i.value.trim(); if(!m) return; i.value=''; liveMsg('คุณ', m);
+  if(!gx.has()) return setTimeout(()=>liveMsg('🤖 น้องเหลือง AI','สนใจสินค้ากดที่ปักตะกร้าสีเหลืองด้านล่างได้เลยนะคะ! 💛'), 800);
+  const p=P(pinnedId);
+  try{ const r = await gText(`ลูกค้าถามในไลฟ์: "${m}"\nสินค้าที่ปักตะกร้า: ${p.name} ราคา ${baht(p.price)} (ปกติ ${baht(p.old)}) สต็อก ${stockMap[p.id]} ชิ้น: ${p.desc}`, {system:'คุณคือ AI Host "น้องเหลือง" ตอบสั้นไม่เกิน 2 ประโยค ภาษาไทยน่ารัก ใช้เฉพาะข้อมูลที่ให้ ถ้าไม่รู้ให้บอกว่าจะให้แอดมินตอบ', tools:[]}); liveMsg('🤖 น้องเหลือง AI', r.text.trim()) }
+  catch(e){ liveMsg('🤖 น้องเหลือง AI','ขอแอดมินช่วยตอบอีกครั้งนะคะ 💛') }
+}
+
+/* ---- Dashboard: AI Insights จริงจากข้อมูลร้าน ---- */
+function paintIns(items){
+  $('insights').innerHTML = items.map(x=>`<div class="p-3 bg-brand-50 dark:bg-brand-900/30 rounded-xl text-xs space-y-1"><b>${esc(x.icon||'💡')} ${esc(x.title)}</b><div>${esc(x.detail)}</div><div class="font-bold text-brand-600 dark:text-brand-400">→ ${esc(x.action)}</div></div>`).join('')
+    + '<button onclick="aiInsights(true)" class="text-[11px] text-gray-400 hover:text-brand-500"><i class="fa-solid fa-rotate"></i> วิเคราะห์ใหม่</button>';
+}
+async function aiInsights(force){
+  if(!gx.has()) return;
+  const c = load('yb_ins', null); if(c && !force && Date.now()-c.t<600000) return paintIns(c.items);
+  $('insights').innerHTML='<div class="text-xs text-gray-400"><i class="fa-solid fa-spinner fa-spin"></i> Gemini กำลังวิเคราะห์...</div>';
+  try{
+    const data = {products:PRODUCTS.map(p=>({name:p.name,price:p.price,old:p.old,stock:stockMap[p.id],sold:p.sold,rating:p.rating})), orders:orders.slice(0,20).map(o=>({ch:o.ch,total:o.total,status:STATUS[o.st]})), lowStockThreshold:settings.lowStock, dynamicPricing:settings.dynamicPrice};
+    const r = await gText('วิเคราะห์ข้อมูลร้านนี้ให้ 3 ข้อเสนอ (สต็อก/ราคา/โปรโมชัน) อ้างอิงตัวเลขจริงเท่านั้น ตอบ JSON: [{"icon":emoji,"title":string,"detail":string,"action":string}]\n'+JSON.stringify(data), {json:true, tools:settings.codeExec?[{code_execution:{}}]:[]});
+    const items = parseJson(r.text).slice(0,4); save('yb_ins',{t:Date.now(),items}); paintIns(items);
+  } catch(e){ $('insights').innerHTML = errBox(e) }
+}
+const _renderDash = renderDash; renderDash = function(){ _renderDash(); aiInsights(false) };
+
+/* ---- Settings (ส่วนขยาย) ---- */
+const XMAP = {imageModel:'x-image', videoModel:'x-video', ttsModel:'x-tts', embedModel:'x-embed', voice:'x-voice', thinking:'x-think', webhookSecret:'set-webhook-secret'};
+const XCHK = {groundText:'x-ground', urlCtx:'x-url', codeExec:'x-code'};
+const _renderSettings = renderSettings;
+renderSettings = function(){
+  _renderSettings();
+  $('x-voice').innerHTML = VOICES.map(v=>`<option>${v}</option>`).join('');
+  Object.entries(XMAP).forEach(([k,id])=>{ const el=$(id); if(el) el.value = settings[k] ?? EXTRA[k] });
+  Object.entries(XCHK).forEach(([k,id])=>{ $(id).checked = !!settings[k] });
+  paintModels();
+};
+const _saveAll = saveAllSettings;
+saveAllSettings = function(){
+  const ex = {}; Object.entries(XMAP).forEach(([k,id])=>ex[k]=$(id).value.trim()); Object.entries(XCHK).forEach(([k,id])=>ex[k]=$(id).checked);
+  _saveAll(); settings = {...settings, ...ex, v:4}; save('yb_settings', settings); startSync(); refreshModels(true);
+};
+const _resetSettings = resetSettings;
+resetSettings = function(){ _resetSettings(); settings = {...defaultSettings, ...EXTRA, geminiModel:'gemini-flash-latest'}; save('yb_settings', settings); renderSettings() };
+
+/* ---- Health check จริง ---- */
+function setSt(id, kind, text){
+  const el=$(id); if(!el) return;
+  const c = {ok:'bg-green-500/20 text-green-400', warn:'bg-yellow-500/20 text-yellow-400', err:'bg-red-500/20 text-red-400'}[kind];
+  el.className = `px-2 py-0.5 rounded text-[10px] font-bold ${c}`; el.textContent = text;
+}
+async function testConnections(){
+  toast('กำลังทดสอบการเชื่อมต่อจริง...');
+  const jobs = [
+    (async()=>{ if(!gx.has()) return setSt('st-gemini','warn','ยังไม่ตั้งค่า');
+      try{ await gx.req('models?pageSize=1', null, 'GET', 12000); setSt('st-gemini','ok','เชื่อมต่อแล้ว'); refreshModels(true) } catch(e){ setSt('st-gemini','err', short(e.message).slice(0,28)) } })(),
+    (async()=>{ if(!settings.vertexUrl) return setSt('st-proxy','warn','Local Fallback');
+      try{ const r=await fetch(settings.vertexUrl.replace(/\/$/,'')+'/health'); setSt('st-proxy', r.ok?'ok':'err', r.ok?'Online':'HTTP '+r.status) } catch(e){ setSt('st-proxy','err','เชื่อมต่อไม่ได้') } })(),
+    (async()=>{ if(!settings.webhookUrl) return setSt('st-hook','warn','ยังไม่ตั้งค่า');
+      try{ await post('webhook', {id:'ping', event:'ping', data:{}, ts:Date.now()}); setSt('st-hook','ok','ส่งสำเร็จ') } catch(e){ setSt('st-hook','err','ส่งไม่ได้/CORS') } })()
+  ];
+  await Promise.all(jobs);
+  const plat = settings.vertexUrl && (settings.tiktokApp||settings.shopeePartner||settings.lineToken);
+  setSt('st-tiktok', plat?'ok':'warn', plat?'ผ่าน Proxy':'ต้องมี Proxy');
+  setSt('st-pay', ppPayload(settings.promptpayId,1)?'ok':'err', ppPayload(settings.promptpayId,1)?'PromptPay พร้อม':'ไม่มีเลข PromptPay');
+  toast('ทดสอบเสร็จสิ้น — ดูผลที่ API Status Monitor'); addFeed('API Health Check เสร็จสิ้น','fa-vial','text-green-500');
+}
+
+window.addEventListener('DOMContentLoaded', () => { paintModels(); startSync(); flushOutbox(); if(gx.has() && !MODELS.length) refreshModels(true) });
+
+</script>
 </body>
 </html>
-```[cite: 1]
